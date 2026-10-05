@@ -1,0 +1,1147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FarmGo Connect Guide</title>
+<meta name="description" content="How to use FarmGo Connect: buying, selling, quality checks, delivery and payments, explained step by step for every role.">
+<meta name="theme-color" content="#0E3B22">
+<link rel="icon" href="img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --band: #0E3B22;
+  --band-2: #134A2C;
+  --primary: #1C6536;
+  --primary-ink: #165029;
+  --leaf: #3E9B4F;
+  --lime: #B9CF4B;
+  --bg: #F4F7F3;
+  --surface: #FFFFFF;
+  --sunk: #EAF1E8;
+  --ink: #10241A;
+  --ink-2: #44574B;
+  --ink-3: #6B7D71;
+  --line: #DCE6DD;
+  --on-band: #F2F7EE;
+  --on-band-2: #B9CCBC;
+  --amber-bg: #FFF4DC;
+  --amber-ink: #7A4B00;
+  --shadow: 0 1px 2px rgba(16, 36, 26, .06), 0 12px 32px -12px rgba(16, 36, 26, .18);
+  --phone-shadow: 0 2px 4px rgba(6, 22, 14, .12), 0 30px 60px -20px rgba(6, 22, 14, .45);
+  --radius: 22px;
+  --rail: 248px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0B1510; --surface: #12201A; --sunk: #172A20; --ink: #E8F0E9; --ink-2: #B4C4B8; --ink-3: #8DA092;
+    --line: #23362B; --primary: #6FCB80; --primary-ink: #8FDB9D; --amber-bg: #3A2B10; --amber-ink: #F5CF85;
+    --band: #143826; --band-2: #1A4430;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 12px 32px -12px rgba(0, 0, 0, .6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0B1510; --surface: #12201A; --sunk: #172A20; --ink: #E8F0E9; --ink-2: #B4C4B8; --ink-3: #8DA092;
+  --line: #23362B; --primary: #6FCB80; --primary-ink: #8FDB9D; --amber-bg: #3A2B10; --amber-ink: #F5CF85;
+  --band: #143826; --band-2: #1A4430;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 12px 32px -12px rgba(0, 0, 0, .6);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 88px; -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 400 17px/1.6 Figtree, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-feature-settings: "ss01", "cv11"; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+img { display: block; max-width: 100%; }
+a { color: var(--primary-ink); text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--lime); outline-offset: 3px; border-radius: 8px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.wrap { width: min(1240px, 100% - 32px); margin-inline: auto; }
+svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── Top bar ─────────────────────────────────────────── */
+.top {
+  position: sticky; top: 0; z-index: 30; background: color-mix(in srgb, var(--band) 92%, transparent);
+  backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  color: var(--on-band); border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+.top .wrap { display: flex; align-items: center; gap: 16px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; white-space: nowrap; flex: none; color: inherit; text-decoration: none; font-weight: 800; letter-spacing: -.01em; }
+.brand svg { width: 30px; height: 30px; }
+.brand small { font-weight: 600; color: var(--on-band-2); margin-left: 2px; }
+.find {
+  margin-left: auto; position: relative; width: min(360px, 46vw);
+}
+.find input {
+  width: 100%; height: 40px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(255, 255, 255, .07); color: var(--on-band); padding: 0 44px 0 40px; font: 500 15px Figtree, sans-serif;
+}
+.find input::placeholder { color: var(--on-band-2); }
+.find input:focus { outline: none; border-color: var(--lime); background: rgba(255, 255, 255, .11); }
+.find svg { position: absolute; left: 13px; top: 10px; color: var(--on-band-2); }
+.find kbd {
+  position: absolute; right: 10px; top: 9px; font: 600 12px Figtree, sans-serif; color: var(--on-band-2);
+  border: 1px solid rgba(255, 255, 255, .18); border-radius: 6px; padding: 1px 7px;
+}
+.find-results {
+  position: absolute; top: 48px; left: 0; right: 0; background: var(--surface); color: var(--ink);
+  border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--line); padding: 6px; display: none; max-height: 60vh; overflow: auto;
+}
+.find-results.open { display: block; }
+.find-results a { display: flex; gap: 10px; align-items: baseline; padding: 10px 12px; border-radius: 10px; text-decoration: none; color: var(--ink); }
+.find-results a:hover, .find-results a.on { background: var(--sunk); }
+.find-results a span { color: var(--ink-3); font-size: 13px; font-weight: 600; margin-left: auto; white-space: nowrap; }
+.find-results p { margin: 10px 12px; color: var(--ink-3); font-size: 15px; }
+@media (max-width: 640px) {
+  .find kbd, .brand small { display: none; }
+  .find { width: auto; flex: 1; min-width: 0; }
+  .find input { padding-right: 14px; }
+  .brand { font-size: 15px; gap: 8px; }
+  .brand svg { width: 26px; height: 26px; }
+}
+
+/* ── Hero ────────────────────────────────────────────── */
+.hero { background: var(--band); color: var(--on-band); position: relative; overflow: hidden; isolation: isolate; }
+.hero-photo {
+  position: absolute; inset: 0 0 0 34%; z-index: -1; background: url(img/handover-wide.webp) 62% 50% / cover no-repeat;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 38%); mask-image: linear-gradient(90deg, transparent 0%, #000 38%);
+  opacity: .78;
+}
+.hero::after {
+  content: ""; position: absolute; inset: auto 0 0 0; height: 40%; z-index: -1;
+  background: linear-gradient(to top, var(--band), transparent);
+}
+@media (max-width: 640px) {
+  .hero-photo { inset: 0; opacity: .32; -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 85%); mask-image: linear-gradient(180deg, #000 0%, transparent 85%); }
+}
+.hero .wrap { padding: clamp(56px, 9vw, 120px) 0 clamp(40px, 6vw, 72px); }
+.hero h1 {
+  margin: 0; font-weight: 900; letter-spacing: -.035em; line-height: .98;
+  font-size: clamp(44px, 7.4vw, 96px); text-wrap: balance;
+}
+.hero h1 em { font-style: normal; color: var(--lime); }
+.hero .lede { max-width: 46ch; font-size: clamp(18px, 1.6vw, 21px); color: var(--on-band-2); margin: 24px 0 0; line-height: 1.5; }
+.roles { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 40px; max-width: 760px; }
+.role-pick {
+  display: inline-flex; align-items: center; gap: 10px; height: 48px; padding: 0 20px 0 14px; border-radius: 999px;
+  background: rgba(255, 255, 255, .08); color: var(--on-band); text-decoration: none; font-weight: 700; font-size: 16px;
+  border: 1px solid rgba(255, 255, 255, .12); transition: background .2s, border-color .2s, transform .2s;
+}
+.role-pick:hover { background: rgba(255, 255, 255, .16); border-color: rgba(185, 207, 75, .6); transform: translateY(-1px); }
+.role-pick svg { color: var(--lime); }
+.role-pick.mine { background: var(--lime); color: var(--band); border-color: var(--lime); }
+.role-pick.mine svg { color: var(--band); }
+.hero-foot { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 56px; color: var(--on-band-2); font-size: 15px; }
+.hero-foot b { color: var(--on-band); font-weight: 700; }
+
+/* ── Journey ─────────────────────────────────────────── */
+.journey { padding: clamp(64px, 8vw, 112px) 0 clamp(40px, 5vw, 72px); }
+.h2 { font-size: clamp(32px, 4.2vw, 54px); font-weight: 900; letter-spacing: -.03em; line-height: 1.02; margin: 0; text-wrap: balance; max-width: 18ch; }
+.sub { color: var(--ink-2); max-width: 60ch; margin: 16px 0 0; font-size: 18px; }
+.track {
+  --fill: 0; position: relative; display: grid; grid-template-columns: repeat(7, minmax(150px, 1fr)); gap: 0;
+  margin-top: 48px; overflow-x: auto; padding: 8px 0 20px; scroll-snap-type: x mandatory; scrollbar-width: thin;
+}
+.track::before, .track::after {
+  content: ""; position: absolute; top: 37px; left: 28px; height: 3px; border-radius: 3px;
+}
+.track::before { right: 28px; background: var(--line); min-width: calc(7 * 150px - 56px); }
+.track::after { width: calc(100% - 56px); min-width: calc(7 * 150px - 56px); transform-origin: left center; transform: scaleX(var(--fill)); background: linear-gradient(90deg, var(--leaf), var(--primary)); transition: transform .15s linear; }
+.stop { position: relative; padding: 0 14px 0 0; scroll-snap-align: start; }
+.dot {
+  position: relative; z-index: 1; width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--surface); border: 1px solid var(--line); color: var(--primary); box-shadow: var(--shadow);
+  transition: background .3s, color .3s, border-color .3s;
+}
+.stop.lit .dot { background: var(--primary); color: #fff; border-color: var(--primary); }
+.dot svg { width: 24px; height: 24px; }
+.stop .who { margin: 18px 0 2px; font-size: 13px; font-weight: 800; color: var(--ink-3); }
+.stop h3 { margin: 0; font-size: 18px; line-height: 1.25; font-weight: 800; letter-spacing: -.01em; }
+.stop p { margin: 6px 0 0; color: var(--ink-2); font-size: 15px; line-height: 1.45; }
+.status {
+  display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px;
+  background: var(--sunk); color: var(--primary-ink); font-size: 13px; font-weight: 700; white-space: nowrap; margin-top: 10px;
+}
+.status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.status.warn { background: var(--amber-bg); color: var(--amber-ink); }
+@media (max-width: 640px) {
+  .track { grid-template-columns: 1fr; overflow: visible; margin-top: 36px; padding: 0; }
+  .track::before { left: 28px; top: 28px; bottom: 28px; right: auto; width: 3px; height: auto; min-width: 0; }
+  .track::after { left: 28px; top: 28px; right: auto; width: 3px; min-width: 0; height: calc(100% - 56px); transform-origin: center top; transform: scaleY(var(--fill)); background: linear-gradient(180deg, var(--leaf), var(--primary)); }
+  .stop { display: grid; grid-template-columns: 58px 1fr; column-gap: 18px; padding: 0 0 28px; }
+  .stop .dot { grid-row: 1 / span 4; }
+  .stop .who { margin-top: 4px; }
+  .stop .status { justify-self: start; }
+  .money { grid-template-columns: 1fr; gap: 12px; }
+  .money svg { width: 32px; height: 32px; }
+}
+.money {
+  margin-top: 40px; display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: center;
+  background: var(--band); color: var(--on-band); border-radius: var(--radius); padding: 28px clamp(22px, 3vw, 36px);
+}
+.money svg { width: 40px; height: 40px; color: var(--lime); }
+.money p { margin: 0; font-size: clamp(17px, 1.6vw, 20px); line-height: 1.5; color: var(--on-band-2); }
+.money b { color: var(--on-band); }
+
+/* ── Layout with chapter rail ───────────────────────── */
+.book { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); gap: clamp(28px, 4vw, 64px); align-items: start; padding-bottom: 80px; }
+.rail { position: sticky; top: 88px; padding-top: 8px; }
+.rail p { margin: 0 0 12px 14px; font-size: 14px; font-weight: 700; color: var(--ink-3); }
+.rail a {
+  position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 14px; margin-bottom: 2px;
+  color: var(--ink-2); text-decoration: none; font-weight: 700; transition: background .2s, color .2s;
+}
+.rail a:hover { background: var(--sunk); color: var(--ink); }
+.rail a.on { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.rail a.on svg { color: var(--primary); }
+.rail a .n { margin-left: auto; font-size: 13px; color: var(--ink-3); font-weight: 600; }
+@media (max-width: 980px) {
+  .book { grid-template-columns: 1fr; }
+  .rail {
+    top: 64px; z-index: 20; margin: 0 -16px; padding: 10px 16px; display: flex; gap: 8px; overflow-x: auto;
+    background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line); scrollbar-width: none;
+  }
+  .rail::-webkit-scrollbar { display: none; }
+  .rail p, .rail a .n { display: none; }
+  .rail a { flex: none; margin: 0; padding: 8px 14px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-size: 15px; }
+  .rail a.on { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: none; }
+  .rail a.on svg { color: #fff; }
+  html { scroll-padding-top: 132px; }
+}
+
+/* ── Chapters ───────────────────────────────────────── */
+.chapter { padding-top: 24px; }
+.chapter + .chapter { margin-top: 72px; }
+.opener {
+  position: relative; overflow: hidden; border-radius: 28px; background: var(--band); color: var(--on-band);
+  padding: clamp(28px, 4vw, 48px); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: end;
+}
+.opener::before {
+  content: ""; position: absolute; right: -60px; top: -80px; width: 340px; height: 340px; opacity: .09;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M47 86C20 80 5 52 10 18c30 4 48 32 37 68Z' fill='%23B9CF4B'/%3E%3Cpath d='M51 88c-1-36 15-66 43-78 6 34-10 66-43 78Z' fill='%23B9CF4B'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.opener h2 { margin: 0; font-size: clamp(36px, 5vw, 64px); font-weight: 900; letter-spacing: -.035em; line-height: 1; }
+.opener p { margin: 14px 0 0; color: var(--on-band-2); max-width: 54ch; font-size: 18px; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; position: relative; }
+.tabs span {
+  display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 999px; font-size: 14px; font-weight: 700;
+  background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .12);
+}
+.tabs span.mid { background: var(--lime); color: var(--band); border-color: var(--lime); }
+.opener .tabs-label { width: 100%; text-align: right; font-size: 13px; color: var(--on-band-2); font-weight: 600; margin: 0 0 4px; }
+@media (max-width: 760px) { .opener { grid-template-columns: 1fr; } .tabs { justify-content: flex-start; } .tabs-label { text-align: left; } }
+
+/* ── Task spreads ───────────────────────────────────── */
+.task {
+  display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: clamp(28px, 4vw, 56px); align-items: start;
+  padding: 56px 0; border-bottom: 1px solid var(--line);
+}
+.task:last-child { border-bottom: 0; }
+.task.hide { display: none; }
+.phone {
+  position: sticky; top: 104px; width: 100%; max-width: 300px; aspect-ratio: 390 / 844; border-radius: 46px; padding: 9px;
+  background: linear-gradient(145deg, #2A3A31, #0D1611 60%); box-shadow: var(--phone-shadow);
+}
+.phone::before {
+  content: ""; position: absolute; top: 19px; left: 50%; width: 11px; height: 11px; margin-left: -5px; border-radius: 50%;
+  background: #050907; z-index: 2; box-shadow: 0 0 0 2px #1B261F;
+}
+.phone img { width: 100%; height: 100%; object-fit: cover; object-position: top; border-radius: 38px; background: var(--sunk); }
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; position: sticky; top: 104px; }
+.duo .phone { position: relative; top: 0; border-radius: 34px; padding: 7px; }
+.duo .phone img { border-radius: 28px; }
+.duo .phone::before { top: 14px; width: 9px; height: 9px; }
+.task.wide { grid-template-columns: 420px minmax(0, 1fr); }
+.task h3 { margin: 0; font-size: clamp(26px, 2.6vw, 34px); font-weight: 900; letter-spacing: -.025em; line-height: 1.1; text-wrap: balance; }
+.task .why { margin: 12px 0 0; color: var(--ink-2); font-size: 18px; max-width: 58ch; }
+.steps { list-style: none; margin: 28px 0 0; padding: 0; counter-reset: s; max-width: 62ch; }
+.steps li { position: relative; counter-increment: s; padding: 0 0 22px 56px; }
+.steps li::before {
+  content: counter(s); position: absolute; left: 0; top: -3px; width: 36px; height: 36px; border-radius: 50%;
+  display: grid; place-items: center; font-weight: 800; font-size: 16px; color: var(--primary-ink);
+  background: var(--sunk); border: 1px solid var(--line); font-variant-numeric: tabular-nums;
+}
+.steps li:not(:last-child)::after {
+  content: ""; position: absolute; left: 17.5px; top: 38px; bottom: 4px; width: 1px; background: var(--line);
+}
+.ui {
+  display: inline-block; padding: 0 9px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line);
+  font-weight: 700; color: var(--ink); white-space: nowrap; line-height: 1.55; font-size: .94em;
+  box-shadow: 0 1px 0 var(--line);
+}
+.ui.go { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: none; }
+:root[data-theme="dark"] .ui.go { color: #08130C; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ui.go { color: #08130C; } }
+.note {
+  display: grid; grid-template-columns: 28px 1fr; gap: 12px; margin-top: 8px; padding: 18px 20px; border-radius: 18px;
+  background: var(--sunk); color: var(--ink-2); max-width: 62ch; font-size: 16px;
+}
+.note svg { color: var(--primary); width: 24px; height: 24px; margin-top: 1px; }
+.note b { color: var(--ink); }
+.note.warn { background: var(--amber-bg); color: var(--amber-ink); }
+.note.warn svg, .note.warn b { color: var(--amber-ink); }
+.note + .note { margin-top: 12px; }
+@media (max-width: 860px) {
+  .task, .task.wide { grid-template-columns: 1fr; padding: 40px 0; }
+  .phone { position: relative; top: 0; max-width: 250px; margin-inline: auto; }
+  .duo { position: static; max-width: 440px; margin-inline: auto; }
+}
+
+/* ── Reference ──────────────────────────────────────── */
+.ref { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-top: 36px; }
+.panel { background: var(--surface); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); }
+.panel h3 { margin: 0 0 6px; font-size: 22px; font-weight: 800; letter-spacing: -.015em; }
+.panel > p { margin: 0 0 16px; color: var(--ink-2); font-size: 16px; }
+.rows { margin: 0; padding: 0; list-style: none; }
+.rows li { display: grid; grid-template-columns: minmax(150px, auto) 1fr; gap: 16px; padding: 12px 0; border-top: 1px solid var(--line); font-size: 15px; color: var(--ink-2); align-items: baseline; }
+.rows li .status { margin: 0; justify-self: start; }
+@media (max-width: 760px) { .ref { grid-template-columns: 1fr; } .rows li { grid-template-columns: 1fr; gap: 6px; } }
+.faq details { border-top: 1px solid var(--line); }
+.faq summary {
+  list-style: none; cursor: pointer; padding: 20px 40px 20px 0; position: relative; font-weight: 800; font-size: 18px; letter-spacing: -.01em;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after {
+  content: ""; position: absolute; right: 6px; top: 26px; width: 10px; height: 10px; border-right: 2px solid var(--ink-3);
+  border-bottom: 2px solid var(--ink-3); transform: rotate(45deg); transition: transform .25s;
+}
+.faq details[open] summary::after { transform: rotate(-135deg); top: 31px; }
+.faq details p { margin: 0 0 20px; color: var(--ink-2); max-width: 64ch; }
+
+footer { background: var(--band); color: var(--on-band-2); padding: 56px 0 calc(56px + env(safe-area-inset-bottom)); font-size: 15px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between; }
+footer .brand { color: var(--on-band); }
+footer p { margin: 0; max-width: 52ch; }
+
+/* One authored motion: chapters settle in as they arrive. */
+@media (prefers-reduced-motion: no-preference) {
+  .task .copy, .task .phone, .task .duo { transition: opacity .7s cubic-bezier(.16, 1, .3, 1), transform .7s cubic-bezier(.16, 1, .3, 1), filter .7s; }
+  .js .task:not(.seen) .phone, .js .task:not(.seen) .duo { opacity: 0; transform: translateY(28px) scale(.97); filter: blur(4px); }
+  .js .task:not(.seen) .copy { opacity: 0; transform: translateY(16px); }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="leaf" viewBox="0 0 100 100">
+    <path d="M47 86C20 80 5 52 10 18c30 4 48 32 37 68Z" fill="#3E9B4F"/>
+    <path d="M47 86C40 60 27 38 10 18c30 4 48 32 37 68Z" fill="#257A42"/>
+    <path d="M51 88c-1-36 15-66 43-78 6 34-10 66-43 78Z" fill="#B9CF4B"/>
+    <path d="M51 88c11-28 25-54 43-78 6 34-10 66-43 78Z" fill="#A5C23F"/>
+    <path d="M49 96c-1-6-2-12-5-20" stroke="#155230" stroke-width="4" stroke-linecap="round" fill="none"/>
+  </symbol>
+  <symbol id="i-basket" viewBox="0 0 24 24"><path d="M3 9h18l-1.6 9.2a2 2 0 0 1-2 1.8H6.6a2 2 0 0 1-2-1.8L3 9Z"/><path d="m8 9 3-5M16 9l-3-5M9 13v3M15 13v3"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5h-5v5H5a1 1 0 0 1-1-1v-8.5Z"/></symbol>
+  <symbol id="i-sprout" viewBox="0 0 24 24"><path d="M12 20v-8"/><path d="M12 12c0-4 3-6.5 7-6.5 0 4-3 6.5-7 6.5Z"/><path d="M12 14c0-3.4-2.6-5.5-6-5.5 0 3.4 2.6 5.5 6 5.5Z"/><path d="M7 20h10"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><rect x="5" y="4.5" width="14" height="16" rx="2"/><path d="M9 4.5V3.5h6v1M9 11h6M9 15h4"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5 19 6v5.5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6l7-2.5Z"/><path d="m8.8 12 2.2 2.2 4.2-4.4"/></symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24"><path d="M2.5 6.5h11v9h-11zM13.5 9.5h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4 16a8 8 0 1 1 16 0"/><path d="m12 16 4-5"/><path d="M4 20h16"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.2-3.6 4-5.5 7.5-5.5s6.3 1.9 7.5 5.5"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
+  <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14"/><path d="M5 19c3-4 6-6.5 9-8"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4 21 19H3L12 4Z"/><path d="M12 10v4M12 16.8v.2"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/><path d="M12 14.5v2"/></symbol>
+  <symbol id="i-cash" viewBox="0 0 24 24"><rect x="2.5" y="6.5" width="19" height="11" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 10v4M18 10v4"/></symbol>
+  <symbol id="i-cart" viewBox="0 0 24 24"><path d="M3 4h2l2.2 10.5a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.5-1.2L20.5 8H6.2"/><circle cx="9" cy="20" r="1.2"/><circle cx="17" cy="20" r="1.2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12.2 2.4 2.4 4.6-4.8"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="FarmGo Connect guide, back to top"><svg aria-hidden="true"><use href="#leaf"/></svg>FarmGo Connect <small>Guide</small></a>
+    <div class="find" role="search">
+      <svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
+      <label class="sr" for="q">Find a task</label>
+      <input id="q" type="search" placeholder="Find a task, for example pay or harvest" autocomplete="off" aria-controls="results" aria-expanded="false">
+      <kbd aria-hidden="true">/</kbd>
+      <div class="find-results" id="results" role="listbox" aria-label="Matching tasks"></div>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero">
+  <div class="hero-photo" aria-hidden="true"></div>
+  <div class="wrap">
+    <h1>Grow it. Sell it.<br><em>Get paid.</em></h1>
+    <p class="lede">The complete guide to FarmGo Connect. Find your role below and follow the steps. Every button named here is exactly what you will see in the app.</p>
+    <nav class="roles" aria-label="Choose your role">
+      <a class="role-pick" href="#buyer" data-role="buyer"><svg class="i"><use href="#i-basket"/></svg>Hotel or restaurant</a>
+      <a class="role-pick" href="#buyer" data-role="household"><svg class="i"><use href="#i-home"/></svg>Household</a>
+      <a class="role-pick" href="#farmer" data-role="farmer"><svg class="i"><use href="#i-sprout"/></svg>Farmer</a>
+      <a class="role-pick" href="#agent" data-role="agent"><svg class="i"><use href="#i-clip"/></svg>Field agent</a>
+      <a class="role-pick" href="#qa" data-role="qa"><svg class="i"><use href="#i-shield"/></svg>QA officer</a>
+      <a class="role-pick" href="#driver" data-role="driver"><svg class="i"><use href="#i-truck"/></svg>Driver</a>
+      <a class="role-pick" href="#supplier" data-role="supplier"><svg class="i"><use href="#i-box"/></svg>Youth enterprise</a>
+      <a class="role-pick" href="#admin" data-role="admin"><svg class="i"><use href="#i-gauge"/></svg>Admin</a>
+    </nav>
+    <div class="hero-foot">
+      <span><b>New here?</b> Start with <a href="#start" style="color:var(--lime)">Getting started</a></span>
+      <span><b>Money questions?</b> See <a href="#money" style="color:var(--lime)">Payments</a></span>
+    </div>
+  </div>
+</section>
+
+<section class="journey wrap" aria-labelledby="journey-h">
+  <h2 class="h2" id="journey-h">One order, from request to payout.</h2>
+  <p class="sub">Every FarmGo order passes through the same hands. Knowing the path makes every screen easier to read. The labels in green are the status you will see on the order.</p>
+  <div class="track" id="track">
+    <div class="stop"><div class="dot"><svg class="i"><use href="#i-cart"/></svg></div><p class="who">Buyer</p><h3>Orders and pays</h3><p>Checks out and pays by M-Pesa, or adds it to an invoice.</p><span class="status warn">Waiting for farmer</span></div>
+    <div class="stop"><div class="dot"><svg class="i"><use href="#i-sprout"/></svg></div><p class="who">Farmer</p><h3>Confirms the order</h3><p>Accepts it and starts the harvest.</p><span class="status">Confirmed</span></div>
+    <div class="stop"><div class="dot"><svg class="i"><use href="#i-leaf"/></svg></div><p class="who">Farmer</p><h3>Marks harvest ready</h3><p>The produce waits at the farm gate for checking.</p><span class="status">Quality check</span></div>
+    <div class="stop"><div class="dot"><svg class="i"><use href="#i-shield"/></svg></div><p class="who">QA officer</p><h3>Inspects the produce</h3><p>Grades it and accepts all, part or none.</p><span class="status">Ready for pickup</span></div>
+    <div class="stop"><div class="dot"><svg class="i"><use href="#i-truck"/></svg></div><p class="who">Driver</p><h3>Collects and delivers</h3><p>Scans the crates and takes proof of delivery.</p><span class="status">On the way</span></div>
+    <div class="stop"><div class="dot"><svg class="i"><use href="#i-check"/></svg></div><p class="who">Buyer</p><h3>Confirms receipt</h3><p>Checks the delivery, or reports a problem.</p><span class="status">Delivered</span></div>
+    <div class="stop"><div class="dot"><svg class="i"><use href="#i-cash"/></svg></div><p class="who">Farmer</p><h3>Gets paid</h3><p>The payout is sent to their M-Pesa number.</p><span class="status">Complete</span></div>
+  </div>
+  <div class="money" id="money-promise">
+    <svg class="i" aria-hidden="true"><use href="#i-lock"/></svg>
+    <p><b>Money is held, not handed over.</b> The app explains it in its own words: "Your payment is held until you confirm the delivery is right." The farmer is paid when the buyer confirms delivery, or 48 hours after delivery. Produce that fails the quality check is never charged.</p>
+  </div>
+</section>
+
+<div class="wrap book">
+  <nav class="rail" id="rail" aria-label="Chapters">
+    <p>Chapters</p>
+    <a href="#start"><svg class="i"><use href="#i-user"/></svg>Getting started</a>
+    <a href="#buyer"><svg class="i"><use href="#i-basket"/></svg>Buyers<span class="n">9</span></a>
+    <a href="#farmer"><svg class="i"><use href="#i-sprout"/></svg>Farmers<span class="n">7</span></a>
+    <a href="#agent"><svg class="i"><use href="#i-clip"/></svg>Field agents<span class="n">2</span></a>
+    <a href="#qa"><svg class="i"><use href="#i-shield"/></svg>QA officers<span class="n">2</span></a>
+    <a href="#driver"><svg class="i"><use href="#i-truck"/></svg>Drivers<span class="n">3</span></a>
+    <a href="#supplier"><svg class="i"><use href="#i-box"/></svg>Youth enterprises<span class="n">3</span></a>
+    <a href="#admin"><svg class="i"><use href="#i-gauge"/></svg>Admins<span class="n">3</span></a>
+    <a href="#money"><svg class="i"><use href="#i-cash"/></svg>Payments and statuses</a>
+    <a href="#account"><svg class="i"><use href="#i-lock"/></svg>Account and help</a>
+  </nav>
+
+  <div>
+  <!-- ═══ Getting started ═══ -->
+  <section class="chapter" id="start" aria-labelledby="start-h">
+    <div class="opener">
+      <div><h2 id="start-h">Getting started</h2><p>Create your account once, and FarmGo shows you the screens for your role. The app works in English and Kiswahili.</p></div>
+    </div>
+
+    <article class="task" data-title="Create an account" data-chapter="Getting started">
+      <div class="phone"><img src="shots/welcome.webp" alt="The FarmGo Connect welcome screen with Get Started and Login buttons" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Create an account</h3>
+        <p class="why">Pick what describes you best. Farmers and households sign up with a phone number; hotels, restaurants and youth enterprises use an email address.</p>
+        <ol class="steps">
+          <li>Open the app and tap <span class="ui go">Get Started</span>. Use the <span class="ui">EN</span> <span class="ui">SW</span> switch at the top to choose your language first.</li>
+          <li>Choose <span class="ui">Hotel / Restaurant</span>, <span class="ui">Farmer</span>, <span class="ui">Youth Enterprise</span> or <span class="ui">Individual / Household</span>.</li>
+          <li>With a phone number, tap <span class="ui go">Send code</span> and type the 6-digit code from the SMS. With email, fill in your name, email and a password, then tap <span class="ui go">Create account</span>.</li>
+          <li>Tick <span class="ui">I agree to the Terms and Privacy Policy</span>.</li>
+          <li>Finish the short setup. Farmers add their county, M-Pesa number for payments and their farm, pinned on the map. Businesses add the business name, type, phone and KRA PIN. Households add where to deliver. Then tap <span class="ui go">Finish setup</span>.</li>
+        </ol>
+        <div class="note"><svg class="i"><use href="#i-leaf"/></svg><div>You need to be 18 or older to sign up. At the end of setup, tap <span class="ui">Turn on notifications</span> so you never miss an order.</div></div>
+      </div>
+    </article>
+
+    <article class="task" data-title="Sign in" data-chapter="Getting started">
+      <div class="phone"><img src="shots/sign-in.webp" alt="The Welcome back sign in screen with Phone and Email tabs" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Sign in</h3>
+        <p class="why">Use the same way you signed up.</p>
+        <ol class="steps">
+          <li>On the welcome screen, tap <span class="ui">Login</span>.</li>
+          <li>Phone accounts: choose <span class="ui">Phone</span>, enter your number and tap <span class="ui go">Send code</span>, then type the code and tap <span class="ui go">Verify</span>. If it does not arrive, wait for <span class="ui">Resend code</span>.</li>
+          <li>Email accounts: choose <span class="ui">Email</span>, enter your email and password, and tap <span class="ui go">Sign in</span>.</li>
+        </ol>
+        <div class="note"><svg class="i"><use href="#i-lock"/></svg><div>Forgot your password? Tap <span class="ui">Forgot password?</span> and then <span class="ui">Send reset link</span>. The link in the email works for one hour.</div></div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ═══ Buyers ═══ -->
+  <section class="chapter" id="buyer" aria-labelledby="buyer-h">
+    <div class="opener">
+      <div><h2 id="buyer-h">Buyers</h2><p>For hotels, restaurants, caterers and households. Shop fresh produce straight from farms, or tell farmers what you will need before they harvest.</p></div>
+      <div class="tabs" aria-label="Your bottom tabs"><p class="tabs-label">Your tabs</p><span>Home</span><span>Orders</span><span>Messages</span><span>Profile</span></div>
+    </div>
+
+    <article class="task wide" data-title="Find produce" data-chapter="Buyers">
+      <div class="duo">
+        <div class="phone"><img src="shots/buyer-home.webp" alt="Buyer home with search, Fresh. Local. Sustainable. banner and categories" loading="lazy" width="390" height="844"></div>
+        <div class="phone"><img src="shots/buyer-category.webp" alt="The Vegetables category list with prices and Add to Cart buttons" loading="lazy" width="390" height="844"></div>
+      </div>
+      <div class="copy">
+        <h3>Find produce</h3>
+        <p class="why">Everything on FarmGo comes from a named farm, so you always know where your food grows.</p>
+        <ol class="steps">
+          <li>On <span class="ui">Home</span>, type into <span class="ui">Search for products...</span>. Kiswahili names work too, so "nyanya" finds tomatoes.</li>
+          <li>Or tap a tile under <span class="ui">Categories</span>, such as Vegetables or Fruits, and narrow it with the chips at the top.</li>
+          <li>Scroll to <span class="ui">Featured Farmers</span> and <span class="ui">Fresh near Nairobi</span> to buy from farms close to you.</li>
+          <li>Tap <span class="ui go">Add to Cart</span> straight from the list, or open the item to see more.</li>
+        </ol>
+      </div>
+    </article>
+
+    <article class="task wide" data-title="Check a product and its farm" data-chapter="Buyers">
+      <div class="duo">
+        <div class="phone"><img src="shots/buyer-product.webp" alt="Product page for tomatoes showing price, farm, harvest date and Add to Cart" loading="lazy" width="390" height="844"></div>
+        <div class="phone"><img src="shots/buyer-farmer.webp" alt="A farmer profile with rating, orders delivered and quality check pass rate" loading="lazy" width="390" height="844"></div>
+      </div>
+      <div class="copy">
+        <h3>Check a product and its farm</h3>
+        <p class="why">The product page shows the price per unit, the grade, when the harvest is ready and how much is left.</p>
+        <ol class="steps">
+          <li>Read the price, grade and the <span class="ui">Harvest ready from</span> date.</li>
+          <li>Tap the farm card to see the farmer: their rating, orders delivered and how often their produce passes the quality check.</li>
+          <li>Set the amount with the minus and plus buttons, then tap <span class="ui go">Add to Cart</span>. The message that appears offers <span class="ui">View cart</span>.</li>
+          <li>Tap the heart to save the item to your favorites for next time.</li>
+        </ol>
+      </div>
+    </article>
+
+    <article class="task wide" data-title="Check out and pay" data-chapter="Buyers">
+      <div class="duo">
+        <div class="phone"><img src="shots/buyer-cart.webp" alt="Your Cart with items from two farms, subtotal, delivery fee and total" loading="lazy" width="390" height="844"></div>
+        <div class="phone"><img src="shots/buyer-checkout.webp" alt="Checkout with delivery address, delivery time and Pay button" loading="lazy" width="390" height="844"></div>
+      </div>
+      <div class="copy">
+        <h3>Check out and pay</h3>
+        <p class="why">One cart can hold produce from several farms. Each farm gets its own order, all placed and paid for together.</p>
+        <ol class="steps">
+          <li>Open the cart, check <span class="ui">Subtotal</span>, <span class="ui">Delivery Fee</span> and <span class="ui">Total</span>, and tap <span class="ui go">Proceed to Checkout</span>.</li>
+          <li>Under <span class="ui">Delivery Details</span>, confirm the address and pick a <span class="ui">Preferred Delivery Time</span>. Add <span class="ui">Notes for the driver</span> if they need a gate code or a name to ask for.</li>
+          <li>Under <span class="ui">Payment Method</span>, choose <span class="ui">M-Pesa</span> and check the M-Pesa number. Business accounts on credit terms can choose <span class="ui">Add to invoice</span>.</li>
+          <li>Tap <span class="ui go">Pay KES</span> with the amount. A prompt arrives on your phone: enter your M-Pesa PIN.</li>
+          <li>When you see <span class="ui">Payment received</span>, you are done. Tap <span class="ui">Track my orders</span> to follow it.</li>
+        </ol>
+        <div class="note warn"><svg class="i"><use href="#i-alert"/></svg><div><b>Payment did not go through?</b> Your order is saved. On the screen that says the payment was not completed, check the M-Pesa number and tap <span class="ui">Try again</span>, or tap <span class="ui">Pay later</span> and pay from Orders.</div></div>
+      </div>
+    </article>
+
+    <article class="task wide" data-title="Follow and track an order" data-chapter="Buyers">
+      <div class="duo">
+        <div class="phone"><img src="shots/buyer-order.webp" alt="An order showing the progress steps Order placed, At the farm, On the way, Delivered" loading="lazy" width="390" height="844"></div>
+        <div class="phone"><img src="shots/buyer-track.webp" alt="Track order map with the order status timeline" loading="lazy" width="390" height="844"></div>
+      </div>
+      <div class="copy">
+        <h3>Follow and track an order</h3>
+        <p class="why">Orders update by themselves. You do not need to refresh.</p>
+        <ol class="steps">
+          <li>Open the <span class="ui">Orders</span> tab. <span class="ui">Active</span> shows orders on their way; <span class="ui">Past</span> shows the finished ones.</li>
+          <li>Open an order to see its steps: <span class="ui">Order placed</span>, <span class="ui">At the farm</span>, <span class="ui">On the way</span>, <span class="ui">Delivered</span>.</li>
+          <li>Once a driver has the order, tap <span class="ui go">Track order</span> to see the map, your driver, and buttons to call or message them.</li>
+        </ol>
+      </div>
+    </article>
+
+    <article class="task" data-title="Message the farmer" data-chapter="Buyers">
+      <div class="phone"><img src="shots/buyer-chat.webp" alt="An order chat with the farmer, with a message box and photo button" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Message the farmer</h3>
+        <p class="why">Each order has its own conversation, so questions about harvest, packing or delivery stay with that order.</p>
+        <ol class="steps">
+          <li>Open the order and tap <span class="ui">Message farmer</span>.</li>
+          <li>Type in <span class="ui">Write a message</span> and send. Tap the photo button to share a picture.</li>
+          <li>All your conversations are in the <span class="ui">Messages</span> tab. A badge shows unread messages.</li>
+        </ol>
+      </div>
+    </article>
+
+    <article class="task" data-title="Confirm receipt, rate or report a problem" data-chapter="Buyers">
+      <div class="phone"><img src="shots/buyer-orders.webp" alt="The Orders list with Active and Past tabs" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Confirm receipt, rate or report a problem</h3>
+        <p class="why">Confirming tells FarmGo the delivery is right, and that releases the farmer's payment.</p>
+        <ol class="steps">
+          <li>When the order says <span class="ui">Delivered</span>, check the produce.</li>
+          <li>All good? Tap <span class="ui go">Confirm receipt</span>, then <span class="ui">Yes, all good</span>.</li>
+          <li>Tap <span class="ui">Rate this order</span>, choose the stars, add a comment if you like and tap <span class="ui go">Submit rating</span>.</li>
+          <li>Something wrong? Tap <span class="ui">Report a problem</span>, choose what went wrong, describe what happened, add photos and tap <span class="ui go">Send report</span>.</li>
+          <li>To buy the same again, open a past order and tap <span class="ui">Order again</span>. Items go back in your cart at today's price.</li>
+        </ol>
+        <div class="note"><svg class="i"><use href="#i-lock"/></svg><div>Report problems within <b>48 hours</b> of delivery. While a report is open, the farmer is not paid until it is sorted out. Need to cancel? If the order can still be cancelled, you will see <span class="ui">Cancel order</span> on it, and any payment goes back to M-Pesa.</div></div>
+      </div>
+    </article>
+
+    <article class="task wide" data-title="Post a requirement" data-chapter="Buyers">
+      <div class="duo">
+        <div class="phone"><img src="shots/buyer-requirement.webp" alt="Post a requirement form with produce, quantity, price, date and repeat options" loading="lazy" width="390" height="844"></div>
+        <div class="phone"><img src="shots/buyer-requirements.webp" alt="Requirements list showing open requirements and how much is matched" loading="lazy" width="390" height="844"></div>
+      </div>
+      <div class="copy">
+        <h3>Post a requirement</h3>
+        <p class="why">Tell farmers what you will need before they harvest. FarmGo proposes matches from nearby farms, and you accept the ones you want.</p>
+        <ol class="steps">
+          <li>On Home, tap the banner that says <span class="ui">Tell farmers what you need</span>.</li>
+          <li>Choose the <span class="ui">Produce</span>, the <span class="ui">Quantity</span>, the <span class="ui">Lowest grade you accept</span> and, if you want, the <span class="ui">Most you will pay</span>.</li>
+          <li>Pick the date it is <span class="ui">Needed by</span>, then how often: <span class="ui">Just once</span>, <span class="ui">Every week</span>, <span class="ui">Every 2 weeks</span> or <span class="ui">Every month</span>. The form previews your next delivery dates.</li>
+          <li>Tap <span class="ui go">Post requirement</span>.</li>
+          <li>When farmers are matched, open <span class="ui">Matches</span> and tap <span class="ui go">Accept</span>. Once both sides accept, the order is created.</li>
+        </ol>
+        <div class="note"><svg class="i"><use href="#i-leaf"/></svg><div>Open a requirement any time to <span class="ui">Pause</span>, <span class="ui">Resume</span> or <span class="ui">Close requirement</span>.</div></div>
+      </div>
+    </article>
+
+    <article class="task" data-title="Pay an invoice" data-chapter="Buyers">
+      <div class="phone"><img src="shots/buyer-invoices.webp" alt="Invoices screen for weekly bills on credit terms" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Pay an invoice</h3>
+        <p class="why">For business accounts that FarmGo has approved for credit terms. Orders added to an invoice are billed weekly.</p>
+        <ol class="steps">
+          <li>Open <span class="ui">Invoices</span> from your Home screen or a notification.</li>
+          <li>Open an invoice to see each order on it. Its status is <span class="ui">Due</span>, <span class="ui">Part paid</span>, <span class="ui">Paid</span> or <span class="ui">Overdue</span>.</li>
+          <li>Tap <span class="ui go">Pay KES</span> by M-Pesa, then <span class="ui">Send M-Pesa prompt</span>, and enter your PIN.</li>
+        </ol>
+        <div class="note"><svg class="i"><use href="#i-cash"/></svg><div>You can also pay by bank transfer quoting the invoice number. While an invoice is overdue, new orders may need payment up front.</div></div>
+      </div>
+    </article>
+
+    <article class="task" data-title="Shopping as a household" data-chapter="Buyers">
+      <div class="phone"><img src="shots/household-home.webp" alt="Household home screen with delivery area, search and categories" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Shopping as a household</h3>
+        <p class="why">Households use the same shop, cart and tracking as businesses, with two differences.</p>
+        <ol class="steps">
+          <li>Households always pay in advance by M-Pesa. Credit terms and invoices are not available.</li>
+          <li>Your delivery area shows at the top of Home. Change it, or add up to 20 addresses, under Profile, <span class="ui">Delivery addresses</span>.</li>
+        </ol>
+      </div>
+    </article>
+  </section>
+
+  <!-- ═══ Farmers ═══ -->
+  <section class="chapter" id="farmer" aria-labelledby="farmer-h">
+    <div class="opener">
+      <div><h2 id="farmer-h">Farmers</h2><p>List what you grow, see what buyers need, confirm orders and get paid to M-Pesa. Everything is built to work one-handed, in English or Kiswahili.</p></div>
+      <div class="tabs" aria-label="Your bottom tabs"><p class="tabs-label">Your tabs</p><span>Home</span><span>Orders</span><span class="mid">Sell</span><span>Messages</span><span>Profile</span></div>
+    </div>
+
+    <article class="task" data-title="Your farmer home" data-chapter="Farmers">
+      <div class="phone"><img src="shots/farmer-home.webp" alt="Farmer Dashboard with listings, orders, sales and Needs your action" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Your farmer home</h3>
+        <p class="why">Home shows what needs you today, so you can act in a few taps.</p>
+        <ol class="steps">
+          <li>The cards at the top count your listings, orders and sales.</li>
+          <li><span class="ui">Needs your action</span> lists new orders. Tap <span class="ui go">Confirm order</span> right there.</li>
+          <li>Below it, <span class="ui">My Products</span> shows your live listings. Tap <span class="ui">View All</span> to manage them.</li>
+        </ol>
+      </div>
+    </article>
+
+    <article class="task" data-title="List produce for sale" data-chapter="Farmers">
+      <div class="phone"><img src="shots/farmer-sell.webp" alt="List produce, step 2 of 6, What are you selling, with produce tiles" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>List produce for sale</h3>
+        <p class="why">Six short steps, from choosing the farm to publishing. You can list produce that is still growing.</p>
+        <ol class="steps">
+          <li>Tap the green <span class="ui go">Sell</span> button in the middle of your tab bar.</li>
+          <li>Answer <span class="ui">Which farm is this from?</span> and <span class="ui">What are you selling?</span>, then tap <span class="ui go">Continue</span>.</li>
+          <li>Enter the <span class="ui">Quantity you can supply</span>, your <span class="ui">Price per</span> unit and the <span class="ui">Grade</span>. Not sure of the price? Tap <span class="ui">Use the market price</span>.</li>
+          <li>Set <span class="ui">Ready from</span> and <span class="ui">Available until</span>, and add photos of your produce.</li>
+          <li>Check everything and tap <span class="ui go">Publish listing</span>. You will see <span class="ui">Your listing is live</span>. Not ready yet? Tap <span class="ui">Save as paused</span> instead.</li>
+        </ol>
+      </div>
+    </article>
+
+    <article class="task wide" data-title="Manage your listings" data-chapter="Farmers">
+      <div class="duo">
+        <div class="phone"><img src="shots/farmer-listings.webp" alt="Listings with Live, Upcoming and Closed tabs" loading="lazy" width="390" height="844"></div>
+        <div class="phone"><img src="shots/farmer-listing.webp" alt="A listing with Harvest is ready, Edit listing, Pause and Close listing" loading="lazy" width="390" height="844"></div>
+      </div>
+      <div class="copy">
+        <h3>Manage your listings</h3>
+        <p class="why">Keep your stock and prices right so buyers only order what you can deliver.</p>
+        <ol class="steps">
+          <li>Open your listings from Home. They are grouped as <span class="ui">Live</span>, <span class="ui">Upcoming</span> and <span class="ui">Closed</span>.</li>
+          <li>Open one to <span class="ui">Edit listing</span>, <span class="ui">Pause</span> it, or <span class="ui">Close listing</span>.</li>
+          <li>A closed listing can go back on sale with <span class="ui">Put back on the market</span>.</li>
+        </ol>
+        <div class="note"><svg class="i"><use href="#i-leaf"/></svg><div>Pausing a listing stops new orders. Orders already placed are not affected.</div></div>
+      </div>
+    </article>
+
+    <article class="task" data-title="Confirm an order and mark the harvest ready" data-chapter="Farmers">
+      <div class="phone"><img src="shots/farmer-order.webp" alt="A farmer's order with items, delivery date and Your payout breakdown" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Confirm an order and mark the harvest ready</h3>
+        <p class="why">Every order shows exactly what you will receive after the FarmGo fee.</p>
+        <ol class="steps">
+          <li>A new order shows as <span class="ui">New order</span>. Open it and tap <span class="ui go">Confirm order</span>. The buyer is told straight away.</li>
+          <li>Harvest and pack the produce for the delivery date shown.</li>
+          <li>When it is ready, tap <span class="ui go">Mark ready</span>. A QA officer comes to inspect it at the farm gate.</li>
+          <li>Check <span class="ui">Your payout</span> on the order: the produce value, the FarmGo fee, and <span class="ui">You receive</span>.</li>
+        </ol>
+        <div class="note"><svg class="i"><use href="#i-alert"/></svg><div>Marked a harvest ready by mistake? Open the listing and tap <span class="ui">Undo harvest ready</span>. This works only until the QA officer has started the inspection.</div></div>
+      </div>
+    </article>
+
+    <article class="task" data-title="See what buyers need" data-chapter="Farmers">
+      <div class="phone"><img src="shots/farmer-demand.webp" alt="What buyers need, with county filters and Matches my produce" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>See what buyers need</h3>
+        <p class="why">Hotels and restaurants post what they will need in the coming weeks. Grow and list against real demand.</p>
+        <ol class="steps">
+          <li>Open <span class="ui">What buyers need</span> from your Home shortcuts.</li>
+          <li>Filter by county, and tap <span class="ui">Matches my produce</span> to see only what you grow.</li>
+          <li>Tap <span class="ui go">List this produce</span> to open Sell with the details filled in.</li>
+          <li>When FarmGo matches you to a buyer, open <span class="ui">Matches</span> and tap <span class="ui go">Accept</span> or <span class="ui">Decline</span>.</li>
+        </ol>
+      </div>
+    </article>
+
+    <article class="task" data-title="Track your earnings" data-chapter="Farmers">
+      <div class="phone"><img src="shots/farmer-earnings.webp" alt="Earnings with Paid this month, Being sent, Held for you and a 6 month chart" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Track your earnings</h3>
+        <p class="why">See every shilling: what you have been paid, what is on the way and what is still held.</p>
+        <ol class="steps">
+          <li>Open <span class="ui">Earnings</span> from Home.</li>
+          <li><span class="ui">Paid to you</span> is money already in your M-Pesa. <span class="ui">Being sent</span> is on its way. <span class="ui">Held for you</span> is waiting for the buyer to confirm delivery.</li>
+          <li>Tap any payout to see the breakdown and the M-Pesa receipt.</li>
+          <li>Payouts go to the number shown. Tap <span class="ui">Edit</span> next to it to change it.</li>
+        </ol>
+        <div class="note"><svg class="i"><use href="#i-cash"/></svg><div>You are paid when the buyer confirms delivery, or 48 hours after delivery. If a payout fails, FarmGo retries automatically. If a buyer reports a problem, that payout is on hold until it is resolved.</div></div>
+      </div>
+    </article>
+
+    <article class="task" data-title="Buy green inputs" data-chapter="Farmers">
+      <div class="phone"><img src="shots/farmer-inputs.webp" alt="Green inputs shop with compost, organic fertilizer and seedlings" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Buy green inputs</h3>
+        <p class="why">Compost, organic fertilizer and seedlings from youth enterprises near you.</p>
+        <ol class="steps">
+          <li>Open <span class="ui">Green inputs</span> from Home and browse the <span class="ui">Shop</span>.</li>
+          <li>Open a product, tap <span class="ui go">Order now</span>, choose the quantity and pay with M-Pesa.</li>
+          <li>Follow it under <span class="ui">My orders</span>. When it arrives, tap <span class="ui go">I received it</span>.</li>
+        </ol>
+      </div>
+    </article>
+  </section>
+
+  <!-- ═══ Field agents ═══ -->
+  <section class="chapter" id="agent" aria-labelledby="agent-h">
+    <div class="opener">
+      <div><h2 id="agent-h">Field agents</h2><p>Register farmers in the field, add their farms, and list produce on their behalf.</p></div>
+      <div class="tabs" aria-label="Your bottom tabs"><p class="tabs-label">Your tabs</p><span>Farmers</span><span class="mid">Add farmer</span><span>Orders</span><span>Profile</span></div>
+    </div>
+
+    <article class="task" data-title="Register a farmer" data-chapter="Field agents">
+      <div class="phone"><img src="shots/agent-register.webp" alt="Register a farmer form with name, phone, county, gender and date of birth" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Register a farmer</h3>
+        <p class="why">The farmer gets an SMS to confirm their number. Orders and payments are confirmed to them by SMS too.</p>
+        <ol class="steps">
+          <li>Tap <span class="ui go">Add farmer</span> in the middle of your tab bar.</li>
+          <li>Under <span class="ui">About the farmer</span>, fill in the full name as on their ID, phone number, county and date of birth. Choose their <span class="ui">Language for SMS</span>.</li>
+          <li>Under <span class="ui">Payments</span>, keep <span class="ui">Pay to the same number on M-Pesa</span>, or enter a different M-Pesa number.</li>
+          <li>Turn on <span class="ui">Add their farm now</span> and <span class="ui">Pin the farm</span> on the map.</li>
+          <li>Tap <span class="ui go">Register farmer</span>.</li>
+        </ol>
+        <div class="note"><svg class="i"><use href="#i-alert"/></svg><div>Farmers must be 18 or older. Payouts start once the farmer's ID is verified.</div></div>
+      </div>
+    </article>
+
+    <article class="task" data-title="Look after your farmers" data-chapter="Field agents">
+      <div class="phone"><img src="shots/agent-home.webp" alt="Agent home listing registered farmers with ID status and farms" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Look after your farmers</h3>
+        <p class="why">Your Farmers tab lists everyone you have registered.</p>
+        <ol class="steps">
+          <li>Search by name, phone or farm, or filter by <span class="ui">No farm yet</span> and <span class="ui">ID pending</span>.</li>
+          <li>Open a farmer to <span class="ui">Add farm</span> and then <span class="ui go">Save farm</span>.</li>
+          <li>Tap <span class="ui">List produce for this farm</span> to sell on their behalf, using the same steps as a farmer.</li>
+          <li>Their orders appear in your <span class="ui">Orders</span> tab, where you can <span class="ui">Confirm order</span> and <span class="ui">Mark ready</span> for them.</li>
+        </ol>
+      </div>
+    </article>
+  </section>
+
+  <!-- ═══ QA ═══ -->
+  <section class="chapter" id="qa" aria-labelledby="qa-h">
+    <div class="opener">
+      <div><h2 id="qa-h">QA officers</h2><p>Inspect produce at the farm gate. Your result decides what the buyer pays for and what the farmer is paid.</p></div>
+      <div class="tabs" aria-label="Your bottom tabs"><p class="tabs-label">Your tabs</p><span>Tasks</span><span>History</span><span>Profile</span></div>
+    </div>
+
+    <article class="task" data-title="Choose an inspection" data-chapter="QA officers">
+      <div class="phone"><img src="shots/qa-home.webp" alt="Inspections list with waiting orders and Start inspection buttons" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Choose an inspection</h3>
+        <p class="why">Inspections lists every order whose harvest is ready, with the farm, produce and delivery date.</p>
+        <ol class="steps">
+          <li>Filter by county with the chips at the top. Cards show <span class="ui">Waiting</span> or <span class="ui">Overdue</span>.</li>
+          <li>Use the call and directions buttons to reach the farmer.</li>
+          <li>At the farm, tap <span class="ui go">Start inspection</span>. A half-finished one shows <span class="ui">Continue</span>.</li>
+        </ol>
+      </div>
+    </article>
+
+    <article class="task" data-title="Inspect an order" data-chapter="QA officers">
+      <div class="phone"><img src="shots/qa-task.webp" alt="Inspection form with Pass and Fail, grade, accepted and rejected amounts" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Inspect an order</h3>
+        <p class="why">Grade each item and record how much you accept.</p>
+        <ol class="steps">
+          <li>Answer <span class="ui">Where are you inspecting?</span>: <span class="ui">Farm gate</span>, <span class="ui">Collection centre</span> or <span class="ui">Buyer door</span>.</li>
+          <li>For each item, choose <span class="ui">Pass</span> or <span class="ui">Fail</span>, set the <span class="ui">Grade</span>, and the amounts <span class="ui">Accepted</span> and <span class="ui">Rejected</span>.</li>
+          <li>If anything is rejected, say why and add at least one photo. Work through the <span class="ui">Checklist</span>.</li>
+          <li>Tap <span class="ui go">Submit inspection</span>. If items fail, the button reads <span class="ui">Submit with failures</span> and asks you to confirm.</li>
+        </ol>
+        <div class="note warn"><svg class="i"><use href="#i-alert"/></svg><div><b>Only accepted produce is paid for, and an inspection cannot be undone.</b> If you accept part of an order, the buyer is refunded for the rest. If the whole order fails, the buyer gets a full refund.</div></div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ═══ Drivers ═══ -->
+  <section class="chapter" id="driver" aria-labelledby="driver-h">
+    <div class="opener">
+      <div><h2 id="driver-h">Drivers</h2><p>Run your route: collect from farms, deliver to buyers, and keep track of every crate.</p></div>
+      <div class="tabs" aria-label="Your bottom tabs"><p class="tabs-label">Your tabs</p><span>Today</span><span class="mid">Scan</span><span>Routes</span><span>Profile</span></div>
+    </div>
+
+    <article class="task" data-title="Start your route" data-chapter="Drivers">
+      <div class="phone"><img src="shots/driver-home.webp" alt="Driver Today screen showing your routes for today" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Start your route</h3>
+        <p class="why">Today shows the routes dispatch has given you, with every stop in order.</p>
+        <ol class="steps">
+          <li>On <span class="ui">Today</span>, tap <span class="ui">Open route</span>.</li>
+          <li>Tap <span class="ui go">Start route</span>. Buyers can follow your location until the last stop is done.</li>
+          <li>The route shows <span class="ui">Sharing live location</span> while you drive.</li>
+        </ol>
+        <div class="note"><svg class="i"><use href="#i-leaf"/></svg><div>No route yet? Tap <span class="ui">Check again</span>. Start the route before working on its stops.</div></div>
+      </div>
+    </article>
+
+    <article class="task" data-title="Pick up and deliver" data-chapter="Drivers">
+      <div class="phone"><img src="shots/driver-scan.webp" alt="Scan crate screen with a crate code field" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Pick up and deliver</h3>
+        <p class="why">At each stop, scan the crates so FarmGo knows exactly what moved where.</p>
+        <ol class="steps">
+          <li>Open the stop and tap <span class="ui">Navigate</span>. When you arrive, tap <span class="ui">I am here</span>.</li>
+          <li>Tap <span class="ui">Scan crates</span> and scan each crate as you load or unload it. If a code will not scan, type it under <span class="ui">Or type the code</span>.</li>
+          <li>At a farm, tap <span class="ui go">Confirm pickup</span>.</li>
+          <li>At a buyer, add a photo or a signature under <span class="ui">Proof of delivery</span>, fill in <span class="ui">Received by</span>, and tap <span class="ui go">Confirm delivery</span>.</li>
+        </ol>
+        <div class="note warn"><svg class="i"><use href="#i-alert"/></svg><div>The buyer is not charged for crates you do not scan. Scan empty crates the buyer returns too.</div></div>
+      </div>
+    </article>
+
+    <article class="task" data-title="When a stop cannot be completed" data-chapter="Drivers">
+      <div class="phone"><img src="shots/driver-scan.webp" alt="Scan crate screen used to check a crate's status" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>When a stop cannot be completed</h3>
+        <p class="why">Sometimes a gate is closed or nobody answers. Record it so the buyer is told.</p>
+        <ol class="steps">
+          <li>On the stop, tap <span class="ui">Cannot complete this stop</span>.</li>
+          <li>Choose what went wrong, for example <span class="ui">Closed when I arrived</span> or <span class="ui">Could not reach anyone</span>.</li>
+          <li>Tap <span class="ui go">Mark as failed</span>. The order leaves your route and the buyer is told. This cannot be undone.</li>
+          <li>To check any crate, use <span class="ui">Scan</span> in the tab bar. You can mark it <span class="ui">Mark returned</span> or <span class="ui">Mark lost</span>.</li>
+        </ol>
+      </div>
+    </article>
+  </section>
+
+  <!-- ═══ Suppliers ═══ -->
+  <section class="chapter" id="supplier" aria-labelledby="supplier-h">
+    <div class="opener">
+      <div><h2 id="supplier-h">Youth enterprises</h2><p>Sell compost, organic fertilizer, seedlings and packaging to the farmers on FarmGo.</p></div>
+      <div class="tabs" aria-label="Your bottom tabs"><p class="tabs-label">Your tabs</p><span>Home</span><span>Orders</span><span>Profile</span></div>
+    </div>
+
+    <article class="task" data-title="Your enterprise home" data-chapter="Youth enterprises">
+      <div class="phone"><img src="shots/supplier-home.webp" alt="Enterprise home with sales this month and Needs your action" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Your enterprise home</h3>
+        <p class="why">See this month's sales, new orders and your products at a glance.</p>
+        <ol class="steps">
+          <li>The green card shows sales this month and what has been paid out.</li>
+          <li><span class="ui">Needs your action</span> lists orders waiting for you.</li>
+          <li>Scroll to your products and tap <span class="ui">See all</span> to manage them.</li>
+        </ol>
+      </div>
+    </article>
+
+    <article class="task" data-title="Add a product" data-chapter="Youth enterprises">
+      <div class="phone"><img src="shots/supplier-products.webp" alt="Products list with compost, organic fertilizer and seedlings" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Add a product</h3>
+        <p class="why">Good photos and an honest description sell better.</p>
+        <ol class="steps">
+          <li>On your products, tap <span class="ui go">Add product</span>.</li>
+          <li>Add photos, the <span class="ui">Product name</span>, <span class="ui">Category</span>, <span class="ui">Description</span>, price per unit and how many are <span class="ui">In stock</span>.</li>
+          <li>Say <span class="ui">Where farmers collect or you deliver</span>, then tap <span class="ui go">Publish product</span>.</li>
+          <li>Out of stock for a while? Open the product and tap <span class="ui">Hide from farmers</span>.</li>
+        </ol>
+      </div>
+    </article>
+
+    <article class="task" data-title="Handle input orders" data-chapter="Youth enterprises">
+      <div class="phone"><img src="shots/supplier-orders.webp" alt="Input orders with New, In progress and Done tabs" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Handle input orders</h3>
+        <p class="why">Orders move through <span class="ui">New</span>, <span class="ui">In progress</span> and <span class="ui">Done</span>.</p>
+        <ol class="steps">
+          <li>Open a new order and tap <span class="ui go">Accept</span> or <span class="ui">Decline</span>.</li>
+          <li>Once the farmer has paid, tap <span class="ui go">Mark dispatched</span>. Until then the order says it is waiting for the farmer to pay.</li>
+          <li>When it arrives, tap <span class="ui">Mark delivered</span>.</li>
+        </ol>
+        <div class="note"><svg class="i"><use href="#i-cash"/></svg><div>Farmers pay by M-Pesa when they order. The money is sent to you, less the FarmGo fee, when they confirm delivery.</div></div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ═══ Admin ═══ -->
+  <section class="chapter" id="admin" aria-labelledby="admin-h">
+    <div class="opener">
+      <div><h2 id="admin-h">Admins</h2><p>Run the network: people, money and logistics. The admin screens work best on a tablet or computer.</p></div>
+      <div class="tabs" aria-label="Your bottom tabs"><p class="tabs-label">Your tabs</p><span>Overview</span><span>Orders</span><span>People</span><span>Money</span><span>Logistics</span></div>
+    </div>
+
+    <article class="task" data-title="Overview and people" data-chapter="Admins">
+      <div class="phone"><img src="shots/admin-home.webp" alt="Admin Overview with active orders, disputes, failed payouts and ID checks" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Overview and people</h3>
+        <p class="why">Overview counts what needs attention, with a link from each number straight to the work.</p>
+        <ol class="steps">
+          <li>Use <span class="ui">View orders</span>, <span class="ui">Resolve disputes</span>, <span class="ui">Retry payouts</span> and <span class="ui">Review ID checks</span> to jump in.</li>
+          <li>In <span class="ui">People</span>, open a user to <span class="ui">Change role</span>, <span class="ui">Suspend account</span>, or <span class="ui">Approve</span> or <span class="ui">Reject</span> an ID check.</li>
+          <li>Open an organization to set its <span class="ui">Payment terms</span>, <span class="ui">Credit limit</span> and <span class="ui">Verified buyer</span> status.</li>
+          <li>To see the app as someone else, use <span class="ui">View as another user</span>. Tap <span class="ui">Back to my account</span> when done.</li>
+        </ol>
+        <div class="note"><svg class="i"><use href="#i-lock"/></svg><div>While viewing as another user, money actions are blocked. The view ends by itself after 30 minutes.</div></div>
+      </div>
+    </article>
+
+    <article class="task" data-title="Resolve disputes and payouts" data-chapter="Admins">
+      <div class="phone"><img src="shots/admin-money.webp" alt="Money screen with Payouts, Payments, Invoices and Disputes" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Resolve disputes and payouts</h3>
+        <p class="why">Money keeps payouts, payments, invoices and disputes in one place.</p>
+        <ol class="steps">
+          <li>Open <span class="ui">Disputes</span>, pick one and tap <span class="ui">Mark under review</span>.</li>
+          <li>Tap <span class="ui go">Resolve dispute</span> and choose <span class="ui">Refund the buyer</span> with an amount, or <span class="ui">No refund</span>. Write the decision note.</li>
+          <li>Under <span class="ui">Payouts</span>, filter <span class="ui">Failed</span> and tap <span class="ui">Retry</span>.</li>
+          <li>For bank transfers or cash, use <span class="ui">Record payment</span> with the order code or invoice number.</li>
+        </ol>
+      </div>
+    </article>
+
+    <article class="task" data-title="Plan deliveries" data-chapter="Admins">
+      <div class="phone"><img src="shots/admin-logistics.webp" alt="Logistics with Build routes and the Routes and Crates tabs" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Plan deliveries</h3>
+        <p class="why">Routes batch orders that passed the quality check into one trip.</p>
+        <ol class="steps">
+          <li>In <span class="ui">Logistics</span>, choose the day and tap <span class="ui go">Build routes</span>.</li>
+          <li>Open a route and <span class="ui">Assign driver</span>.</li>
+          <li>Under <span class="ui">Crates</span>, use <span class="ui">Register crates</span> to add new reusable crates.</li>
+        </ol>
+      </div>
+    </article>
+  </section>
+
+  <!-- ═══ Payments and statuses ═══ -->
+  <section class="chapter" id="money" aria-labelledby="money-h">
+    <div class="opener">
+      <div><h2 id="money-h">Payments and statuses</h2><p>How money moves, and what each label on an order means.</p></div>
+    </div>
+    <div class="ref">
+      <div class="panel">
+        <h3>Ways to pay</h3>
+        <p>What you see at checkout depends on your account.</p>
+        <ul class="rows">
+          <li><span class="status">M-Pesa</span><span>A prompt arrives on your phone; enter your PIN and the screen updates by itself. Everyone can use it.</span></li>
+          <li><span class="status">Add to invoice</span><span>Only for business accounts approved for credit terms. Billed weekly, due 7, 14 or 30 days after delivery.</span></li>
+          <li><span class="status">Card / Bank Transfer</span><span>Shown when it is available. You finish paying on a secure page.</span></li>
+          <li><span class="status">Bank or cash</span><span>Recorded by FarmGo staff for buyers who paid outside M-Pesa.</span></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>When farmers are paid</h3>
+        <p>Payouts go to the farmer's M-Pesa number.</p>
+        <ul class="rows">
+          <li><span class="status">Held for you</span><span>The buyer has paid. The money waits until delivery is confirmed.</span></li>
+          <li><span class="status">Processing</span><span>Confirmed, or 48 hours passed after delivery. The payout is being sent.</span></li>
+          <li><span class="status">Paid</span><span>In your M-Pesa, with the receipt on the payout.</span></li>
+          <li><span class="status warn">On hold</span><span>A problem was reported. Paid once it is resolved.</span></li>
+          <li><span class="status warn">Failed</span><span>FarmGo retries automatically. Check your M-Pesa number in Earnings.</span></li>
+        </ul>
+      </div>
+      <div class="panel" style="grid-column: 1 / -1">
+        <h3>Order statuses</h3>
+        <p>Buyers and farmers see the same order with slightly different words where it helps.</p>
+        <ul class="rows">
+          <li><span class="status warn">Waiting for farmer</span><span>Placed and paid. Farmers see this as <b>New order</b>.</span></li>
+          <li><span class="status">Confirmed</span><span>The farmer accepted it. Farmers see <b>To harvest</b>.</span></li>
+          <li><span class="status">Quality check</span><span>Harvested and waiting for a QA officer.</span></li>
+          <li><span class="status">Ready for pickup</span><span>Passed the check and waiting for the driver.</span></li>
+          <li><span class="status warn">Failed quality check</span><span>Rejected at inspection. The buyer is not charged for it.</span></li>
+          <li><span class="status">On the way</span><span>With the driver.</span></li>
+          <li><span class="status">Delivered</span><span>Arrived. The buyer confirms receipt or reports a problem within 48 hours.</span></li>
+          <li><span class="status warn">Problem reported</span><span>FarmGo is looking into it. Most reports are resolved within a day.</span></li>
+          <li><span class="status">Complete</span><span>Delivered, confirmed and the farmer is paid. Farmers see <b>Paid</b>.</span></li>
+          <li><span class="status">Refunded</span><span>The money went back to the buyer.</span></li>
+          <li><span class="status">Cancelled</span><span>Stopped before delivery. Any payment goes back to M-Pesa.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Account and help ═══ -->
+  <section class="chapter" id="account" aria-labelledby="account-h">
+    <div class="opener">
+      <div><h2 id="account-h">Account and help</h2><p>Your profile, language, notifications and where to get help.</p></div>
+    </div>
+
+    <article class="task" data-title="Profile, language and notifications" data-chapter="Account and help">
+      <div class="phone"><img src="shots/profile.webp" alt="Profile with your activity, business and account settings" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Profile, language and notifications</h3>
+        <p class="why">Everything about your account lives in the Profile tab.</p>
+        <ol class="steps">
+          <li>Change language under <span class="ui">Preferences</span>, <span class="ui">Language</span>: <span class="ui">English</span> or <span class="ui">Kiswahili</span>. The whole app switches at once.</li>
+          <li>Open <span class="ui">Notification settings</span> to choose app, SMS and email messages, and set <span class="ui">Quiet hours</span> for the night.</li>
+          <li>Use <span class="ui">Edit profile</span> to update your details, and <span class="ui">Security</span> to change your password or sign out other devices.</li>
+          <li>Choose <span class="ui">Appearance</span>: <span class="ui">Auto</span>, <span class="ui">Light</span> or <span class="ui">Dark</span>.</li>
+        </ol>
+        <div class="note"><svg class="i"><use href="#i-leaf"/></svg><div>Important messages about payments and deliveries always come by SMS, even during quiet hours.</div></div>
+      </div>
+    </article>
+
+    <article class="task" data-title="Get help" data-chapter="Account and help">
+      <div class="phone"><img src="shots/help.webp" alt="Help screen with Ordering, Payments, Delivery and Account questions" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Get help</h3>
+        <p class="why">Answers to common questions are inside the app, sorted by topic.</p>
+        <ol class="steps">
+          <li>Go to <span class="ui">Profile</span>, then <span class="ui">Help</span>.</li>
+          <li>Pick a topic: <span class="ui">Ordering</span>, <span class="ui">Payments</span>, <span class="ui">Delivery</span> or <span class="ui">Account</span>, and tap a question to open the answer.</li>
+          <li>Still stuck? Ask your FarmGo field agent or account manager.</li>
+        </ol>
+      </div>
+    </article>
+
+    <div class="faq panel" style="margin-top: 32px">
+      <h3>Quick answers</h3>
+      <details><summary>I did not get the SMS code.</summary><p>Check the number, wait for <span class="ui">Resend code</span>, and make sure your phone has signal. You can also tap <span class="ui">Change number</span> to fix a typo.</p></details>
+      <details><summary>Can I use the app in Kiswahili?</summary><p>Yes. Go to Profile, <span class="ui">Preferences</span>, <span class="ui">Language</span> and choose <span class="ui">Kiswahili</span>. Before you sign in, use the <span class="ui">SW</span> switch at the top of the welcome screen.</p></details>
+      <details><summary>Why is my order still waiting for the farmer?</summary><p>The farmer has not confirmed it yet. You can message them from the order with <span class="ui">Message farmer</span>.</p></details>
+      <details><summary>Part of my order was rejected at the quality check. Do I pay for it?</summary><p>No. Only accepted produce is paid for. The rest is refunded to your M-Pesa automatically.</p></details>
+      <details><summary>Can I delete my account?</summary><p>Yes, from Profile, <span class="ui">Delete account</span>. It is refused while you still have open orders, or while payouts are on their way to you. Finish those first.</p></details>
+    </div>
+  </section>
+  </div>
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="#top"><svg aria-hidden="true"><use href="#leaf"/></svg>FarmGo Connect</a>
+    <p>A project of EYAAM, Envisioned Youth and Adolescent Ambassadors on the Move. Good food. Stronger communities. A greener future.</p>
+    <p>Guide for app version 1.0, October 2026</p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  root.classList.add('js');
+  const params = new URLSearchParams(location.search);
+  if (params.get('theme') === 'dark' || params.get('theme') === 'light') root.dataset.theme = params.get('theme');
+
+  // Opened from the app with ?role=farmer: highlight that role and jump to its chapter.
+  const role = params.get('role');
+  const chapterFor = { buyer: 'buyer', household: 'buyer', farmer: 'farmer', agent: 'agent', qa: 'qa', driver: 'driver', supplier: 'supplier', input_supplier: 'supplier', admin: 'admin' };
+  if (role && chapterFor[role]) {
+    document.querySelector(`.role-pick[data-role="${role}"]`)?.classList.add('mine');
+  }
+  // Jump to the chapter (or the #link) once fonts have settled, so the target does not drift.
+  const target = location.hash ? document.querySelector(location.hash) : role && chapterFor[role] ? document.getElementById(chapterFor[role]) : null;
+  if (target) (document.fonts?.ready ?? Promise.resolve()).then(() => requestAnimationFrame(() => target.scrollIntoView()));
+
+  // Order journey: the line fills as the section scrolls through the viewport.
+  const track = document.getElementById('track');
+  const stops = [...track.querySelectorAll('.stop')];
+  const fill = () => {
+    const r = track.getBoundingClientRect();
+    const p = Math.min(1, Math.max(0, (innerHeight * 0.85 - r.top) / (innerHeight * 0.6)));
+    track.style.setProperty('--fill', p.toFixed(3));
+    stops.forEach((s, i) => s.classList.toggle('lit', p >= i / (stops.length - 1) - 0.001));
+  };
+  addEventListener('scroll', fill, { passive: true });
+  addEventListener('resize', fill);
+  fill();
+
+  // Tasks settle in once, as they arrive.
+  const tasks = [...document.querySelectorAll('.task')];
+  const seen = new IntersectionObserver((entries) => entries.forEach((e) => {
+    if (e.isIntersecting) { e.target.classList.add('seen'); seen.unobserve(e.target); }
+  }), { rootMargin: '0px 0px -12% 0px' });
+  tasks.forEach((t) => seen.observe(t));
+
+  // Chapter rail follows the reader.
+  const links = [...document.querySelectorAll('#rail a')];
+  const chapters = links.map((a) => document.querySelector(a.getAttribute('href')));
+  const mark = () => {
+    let current = chapters[0];
+    for (const c of chapters) if (c && c.getBoundingClientRect().top < 160) current = c;
+    links.forEach((a) => {
+      const on = a.getAttribute('href') === `#${current.id}`;
+      a.classList.toggle('on', on);
+      const rail = a.parentElement;
+      if (on && rail.scrollWidth > rail.clientWidth) rail.scrollTo({ left: a.offsetLeft - (rail.clientWidth - a.offsetWidth) / 2, behavior: 'smooth' });
+    });
+  };
+  addEventListener('scroll', mark, { passive: true });
+  mark();
+
+  // Find a task.
+  const q = document.getElementById('q');
+  const out = document.getElementById('results');
+  tasks.forEach((t, i) => { if (!t.id) t.id = `task-${i}`; });
+  const index = tasks.map((t) => ({ id: t.id, title: t.dataset.title, chapter: t.dataset.chapter, text: t.textContent.toLowerCase() }));
+  let active = -1;
+  const render = () => {
+    const term = q.value.trim().toLowerCase();
+    active = -1;
+    if (!term) { out.classList.remove('open'); q.setAttribute('aria-expanded', 'false'); return; }
+    const hits = index
+      .map((d) => ({ d, score: (d.title.toLowerCase().includes(term) ? 2 : 0) + (d.text.includes(term) ? 1 : 0) }))
+      .filter((h) => h.score > 0).sort((a, b) => b.score - a.score).slice(0, 8);
+    out.innerHTML = hits.length
+      ? hits.map((h) => `<a href="#${h.d.id}" role="option">${h.d.title}<span>${h.d.chapter}</span></a>`).join('')
+      : '<p>No task matches that. Try a word like pay, order or harvest.</p>';
+    out.classList.add('open');
+    q.setAttribute('aria-expanded', 'true');
+  };
+  q.addEventListener('input', render);
+  q.addEventListener('keydown', (e) => {
+    const items = [...out.querySelectorAll('a')];
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      active = (active + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+      items.forEach((a, i) => a.classList.toggle('on', i === active));
+    } else if (e.key === 'Enter' && items[Math.max(active, 0)]) {
+      e.preventDefault(); items[Math.max(active, 0)].click();
+    } else if (e.key === 'Escape') { q.value = ''; render(); q.blur(); }
+  });
+  out.addEventListener('click', (e) => {
+    if (e.target.closest('a')) { q.value = ''; render(); }
+  });
+  addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement !== q) { e.preventDefault(); q.focus(); }
+  });
+  document.addEventListener('click', (e) => { if (!e.target.closest('.find')) { out.classList.remove('open'); } });
+})();
+</script>
+</body>
+</html>

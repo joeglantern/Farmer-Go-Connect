@@ -2752,6 +2752,8 @@ export const sw: Dictionary = {
     },
   },
   help: {
+    guide: 'Jinsi ya kutumia FarmGo',
+    guideHint: 'Mwongozo wa hatua kwa hatua wa kazi yako, kwa Kiingereza',
     title: 'Msaada',
     subtitle: 'Majibu ya maswali ya kawaida',
     topics: { ordering: 'Kuagiza', payments: 'Malipo', delivery: 'Usafirishaji', account: 'Akaunti' },

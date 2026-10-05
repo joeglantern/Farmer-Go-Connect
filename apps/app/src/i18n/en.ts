@@ -2738,6 +2738,8 @@ export const en = {
     },
   },
   help: {
+    guide: 'How to use FarmGo',
+    guideHint: 'Step-by-step guide for your role, with pictures',
     title: 'Help',
     subtitle: 'Answers to common questions',
     topics: { ordering: 'Ordering', payments: 'Payments', delivery: 'Delivery', account: 'Account' },

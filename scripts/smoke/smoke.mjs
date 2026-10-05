@@ -58,7 +58,9 @@ async function call(method, path, { token, org, body, expect } = {}) {
 async function step(name, fn) {
   try {
     const out = await fn();
-    record(name, true, typeof out === 'string' ? out : '');
+    // Session tokens are strings too; never print them.
+    const detail = typeof out === 'string' && !name.includes('signs in') && !name.includes('opens the app') ? out : '';
+    record(name, true, detail);
     return out ?? true;
   } catch (err) {
     record(name, false, err.message);

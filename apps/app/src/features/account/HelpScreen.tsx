@@ -4,6 +4,7 @@ import { Linking, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSession } from '../../data/session';
 import { PRIVACY_URL, SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_WHATSAPP, TERMS_URL } from '../../lib/config';
+import { openGuide } from '../../lib/guide';
 import { useSizeClass, useTheme } from '../../theme/theme';
 import { Chip } from '../../ui/Controls';
 import { Icon } from '../../ui/Icon';
@@ -113,6 +114,15 @@ export function HelpScreen() {
 
   const side = (
     <View style={{ gap: 20 }}>
+      <ListGroup>
+        <ListRow
+          icon="book"
+          label={tr('help.guide')}
+          detail={tr('help.guideHint')}
+          external
+          onPress={() => openGuide(role ?? 'user')}
+        />
+      </ListGroup>
       {contacts.length > 0 ? (
         <ListGroup title={tr('help.contact')} footer={tr('help.hours')}>
           {contacts}

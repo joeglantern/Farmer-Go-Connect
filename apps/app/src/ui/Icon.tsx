@@ -7,6 +7,7 @@ import { Bank as PBank } from 'phosphor-react-native/src/icons/Bank';
 import { Barn as PBarn } from 'phosphor-react-native/src/icons/Barn';
 import { Basket as PBasket } from 'phosphor-react-native/src/icons/Basket';
 import { Bell as PBell } from 'phosphor-react-native/src/icons/Bell';
+import { BookOpenText as PBookOpenText } from 'phosphor-react-native/src/icons/BookOpenText';
 import { Buildings as PBuildings } from 'phosphor-react-native/src/icons/Buildings';
 import { CalendarBlank as PCalendarBlank } from 'phosphor-react-native/src/icons/CalendarBlank';
 import { Camera as PCamera } from 'phosphor-react-native/src/icons/Camera';
@@ -102,6 +103,7 @@ import { useTheme } from '../theme/theme';
 
 // One import per icon: importing the package root pulls in all 1,500 icons (megabytes on web).
 const P = {
+  BookOpenText: PBookOpenText,
   ArrowClockwise: PArrowClockwise,
   ArrowLeft: PArrowLeft,
   ArrowRight: PArrowRight,
@@ -276,6 +278,7 @@ const map = {
   settings: P.GearSix,
   logout: P.SignOut,
   help: P.Question,
+  book: P.BookOpenText,
   more: P.DotsThree,
   moreVertical: P.DotsThreeVertical,
   menu: P.List,

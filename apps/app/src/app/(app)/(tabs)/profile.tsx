@@ -11,6 +11,7 @@ import { BuyerStatsCard } from '../../../features/home/BusinessSummary';
 import type { Language } from '../../../i18n';
 import { PRIVACY_URL, SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_WHATSAPP, TERMS_URL } from '../../../lib/config';
 import { humanError } from '../../../lib/errors';
+import { openGuide } from '../../../lib/guide';
 import { useRole } from '../../../nav/Shell';
 import { type SchemePreference, useSchemePreference, useSizeClass, useTheme } from '../../../theme/theme';
 import { Avatar, Card, Pill, Segmented } from '../../../ui/Controls';
@@ -225,6 +226,7 @@ export default function Profile() {
 
   const support = (
     <ListGroup title={tr('profile.support')}>
+      <ListRow key="guide" icon="book" label={tr('help.guide')} external onPress={() => openGuide(role)} />
       <ListRow key="help" icon="help" label={tr('help.title')} onPress={() => router.push('/help')} />
       {SUPPORT_WHATSAPP ? (
         <ListRow

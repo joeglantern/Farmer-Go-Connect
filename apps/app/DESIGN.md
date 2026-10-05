@@ -64,3 +64,15 @@ Short and purposeful: 120 to 320 ms, ease-out for things arriving. Respect reduc
 ## App icon
 
 Generated from the leaf mark by `design/make-icons.mjs`: the two-tone leaf on pale leaf green for the app icon, a white silhouette for Android notifications, and the mark alone for the splash on light and dark grounds.
+
+## Product manual
+
+The user manual lives at `public/guide/index.html` and is served by the web app at `/guide/`. The app opens it from Profile and Help through `openGuide()` in `src/lib/guide.ts`, which adds `?role=` so the reader lands on their own chapter.
+
+- Form: a field manual. A chapter per role, picked from the hero or the chapter rail (sidebar on desktop, a sticky chip row on phones). Each task is a spread: a real screenshot in a dark phone bezel beside numbered steps.
+- Button and screen labels in the steps are set as small keycap chips (`.ui`); the main action of a step is the filled green chip (`.ui.go`). Labels are quoted exactly from `src/i18n/en.ts`.
+- Chapter openers use the band green with the lime leaf, and list that role's bottom tabs, with the centre action in lime.
+- The order journey near the top is the one moving element: its line fills as the reader scrolls. Tasks settle in once as they arrive. Both respect reduced motion.
+- Status names use the same pill as the app (green for normal, amber for waiting or trouble).
+- Screenshots come from the live tester stack with `node scripts/manual/capture.mjs`. Re-run it after any visible UI change, then rebuild the web app.
+- Light and dark follow the system; `?theme=dark` or `?theme=light` forces one.

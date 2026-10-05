@@ -63,11 +63,12 @@ export function darajaTimestamp(d = new Date()): string {
  */
 export class MockMpesa implements MpesaProvider {
   readonly name = 'mock' as const;
-  private readonly pending = new Map<string, string>();
 
   async stkPush(req: StkPushRequest): Promise<StkPushResponse> {
-    const checkoutRequestId = `ws_CO_${Date.now()}_${randomUUID().slice(0, 8)}`;
-    this.pending.set(checkoutRequestId, req.phoneNumber);
+    // The outcome rides in the request id, so any API replica or the worker can answer the
+    // status query; an in-memory map only worked when one process did both.
+    const outcome = req.phoneNumber.endsWith('000') ? 'C' : req.phoneNumber.endsWith('999') ? 'F' : 'S';
+    const checkoutRequestId = `ws_CO_${Date.now()}_${randomUUID().slice(0, 8)}_${outcome}`;
     logger.info({ ...req, checkoutRequestId }, 'M-Pesa STK push (mock)');
     return {
       merchantRequestId: `mock-${randomUUID()}`,
@@ -77,9 +78,8 @@ export class MockMpesa implements MpesaProvider {
   }
 
   async stkQuery(checkoutRequestId: string): Promise<StkQueryResult> {
-    const phone = this.pending.get(checkoutRequestId) ?? '';
-    if (phone.endsWith('000')) return { resultCode: '1032', resultDesc: 'Request cancelled by user' };
-    if (phone.endsWith('999'))
+    if (checkoutRequestId.endsWith('_C')) return { resultCode: '1032', resultDesc: 'Request cancelled by user' };
+    if (checkoutRequestId.endsWith('_F'))
       return { resultCode: '1', resultDesc: 'The balance is insufficient for the transaction' };
     return { resultCode: '0', resultDesc: 'The service request is processed successfully.' };
   }

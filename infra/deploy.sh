@@ -153,7 +153,10 @@ if docker ps -q --filter "label=com.docker.compose.project=$PROJECT" --filter "l
 else
   "${COMPOSE[@]}" up -d --no-deps caddy
 fi
-"${COMPOSE[@]}" up -d --no-deps docker-proxy autoscaler backup backup-offsite uptime-kuma
+SUPPORT=(docker-proxy autoscaler backup backup-offsite uptime-kuma)
+# Shared-host mode also carries the bridge to the host's SMTP relay.
+if grep -qE '^SHARED_HOST=true' "$ENV_FILE"; then SUPPORT+=(smtp-relay-host smtp-bridge); fi
+"${COMPOSE[@]}" up -d --no-deps "${SUPPORT[@]}"
 
 # ── Record and verify ────────────────────────────────────────────────────────
 [ -f "$STATE/current_tag" ] && [ "$(cat "$STATE/current_tag")" != "$IMAGE_TAG" ] && cp "$STATE/current_tag" "$STATE/previous_tag"

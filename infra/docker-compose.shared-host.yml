@@ -12,3 +12,26 @@ services:
 
   uptime-kuma:
     ports: !override ["127.0.0.1:${KUMA_LOCAL_PORT:-3392}:3001"]
+
+  # Email through the host's own SMTP relay (formrelay on 127.0.0.1:2525), the same path the other
+  # apps on this server use. Containers cannot reach the host's loopback, and opening a host port
+  # to them would need a firewall change, so two tiny forwarders meet at a socket file instead:
+  #   worker -> smtp-bridge:2525 (farmgo network) -> /bridge/relay.sock -> smtp-relay-host -> 127.0.0.1:2525
+  # Nothing else on the host changes. Point the app at it with SMTP_HOST=smtp-bridge, SMTP_PORT=2525
+  # and the relay's app credentials in SMTP_USER and SMTP_PASS.
+  smtp-relay-host:
+    image: alpine/socat:latest
+    restart: unless-stopped
+    network_mode: host
+    command: ["UNIX-LISTEN:/bridge/relay.sock,fork,unlink-early,mode=600", "TCP:127.0.0.1:${HOST_SMTP_RELAY_PORT:-2525}"]
+    volumes: ["smtp_bridge:/bridge"]
+
+  smtp-bridge:
+    image: alpine/socat:latest
+    restart: unless-stopped
+    command: ["TCP-LISTEN:2525,fork,reuseaddr", "UNIX-CONNECT:/bridge/relay.sock"]
+    volumes: ["smtp_bridge:/bridge"]
+    depends_on: [smtp-relay-host]
+
+volumes:
+  smtp_bridge:

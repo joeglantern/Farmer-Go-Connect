@@ -16,6 +16,14 @@ export const API_URL = (process.env.EXPO_PUBLIC_API_URL ?? defaultApiUrl()).repl
 export const WS_URL = API_URL.replace(/^http/, 'ws') + '/ws';
 
 /**
+ * The product manual, served by the web app at /guide/. Defaults to the app host that sits
+ * next to the API (api.<host> becomes app.<host>); set EXPO_PUBLIC_GUIDE_URL to override.
+ */
+export const GUIDE_URL =
+  process.env.EXPO_PUBLIC_GUIDE_URL ??
+  (Platform.OS === 'web' ? '/guide/' : `${API_URL.replace('//api.', '//app.')}/guide/`);
+
+/**
  * Support and legal links. Set these per environment (EXPO_PUBLIC_*); rows that need a value
  * that is not configured are hidden rather than pointing somewhere wrong.
  */
