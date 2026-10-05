@@ -1,0 +1,12 @@
+**/node_modules
+**/dist
+**/.turbo
+**/coverage
+**/generated
+.env
+.env.*
+!.env.example
+.git
+*.log
+PLAN.html
+*.pptx

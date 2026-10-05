@@ -1,0 +1,30 @@
+{
+  "name": "farmgo-connect",
+  "private": true,
+  "packageManager": "pnpm@10.32.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev --filter=@farmgo/api --filter=@farmgo/worker",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "infra:up": "docker compose -f infra/docker-compose.yml up -d",
+    "infra:down": "docker compose -f infra/docker-compose.yml down",
+    "db:generate": "pnpm --filter @farmgo/db generate",
+    "db:migrate": "pnpm --filter @farmgo/db migrate:dev",
+    "db:deploy": "pnpm --filter @farmgo/db migrate:deploy",
+    "db:seed": "pnpm --filter @farmgo/api seed",
+    "db:studio": "pnpm --filter @farmgo/db studio",
+    "smoke": "node scripts/smoke/smoke.mjs",
+    "copy-lint": "node scripts/copy-lint.mjs"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.0",
+    "turbo": "^2.11.2",
+    "typescript": "~5.9.2"
+  }
+}

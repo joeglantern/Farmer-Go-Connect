@@ -1,0 +1,192 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_ENV: test
+  DATABASE_URL: postgresql://farmgo:farmgo@localhost:5432/farmgo_test
+  TEST_DATABASE_URL: postgresql://farmgo:farmgo@localhost:5432/farmgo_test
+  REDIS_URL: redis://localhost:6379/0
+  TEST_REDIS_URL: redis://localhost:6379/1
+  BETTER_AUTH_SECRET: ci-secret-that-is-at-least-32-characters-long
+  BETTER_AUTH_URL: http://localhost:4000
+  S3_ENDPOINT: http://localhost:9000
+  S3_ACCESS_KEY: farmgo
+  S3_SECRET_KEY: farmgo-secret
+
+jobs:
+  check:
+    name: Backend lint, typecheck, test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: farmgo
+          POSTGRES_PASSWORD: farmgo
+          POSTGRES_DB: farmgo_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U farmgo" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @farmgo/db exec prisma generate
+      - run: pnpm lint
+      - name: Copy lint (no em dashes, emoji or curly quotes)
+        run: node scripts/copy-lint.mjs
+      - run: pnpm typecheck --filter=!@farmgo/app
+      - name: Migration drift (every schema change has a migration)
+        env:
+          DATABASE_URL: postgresql://farmgo:farmgo@localhost:5432/farmgo_drift
+        run: |
+          PGPASSWORD=farmgo psql -h localhost -U farmgo -d farmgo_test -c 'CREATE DATABASE farmgo_drift'
+          cd packages/db
+          pnpm exec prisma migrate deploy
+          pnpm exec prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code \
+            || { echo "::error::schema.prisma has changes without a migration. Run pnpm db:migrate and commit the migration."; exit 1; }
+      - name: Unit tests
+        run: pnpm --filter @farmgo/contracts --filter @farmgo/core test
+      - name: Autoscaler decision tests
+        run: node --test infra/autoscaler/decide.test.mjs
+      - name: Integration tests (real Postgres and Redis)
+        run: pnpm --filter @farmgo/api test
+      - name: SDK tests (unit, plus the real API on the same test database)
+        run: pnpm --filter @farmgo/sdk test
+      - run: pnpm build --filter=!@farmgo/app
+      - name: Dependency audit (fails on high or critical)
+        run: pnpm audit --prod --audit-level high
+      - name: Shell scripts
+        run: |
+          for f in infra/*.sh infra/observability/*.sh; do bash -n "$f"; done
+          sh -n infra/backup/offsite.sh
+      - name: Caddyfile
+        run: |
+          docker run --rm -v "$PWD/infra/Caddyfile:/etc/caddy/Caddyfile:ro" \
+            -e API_DOMAIN=api.example.test -e APP_DOMAIN=app.example.test -e FILES_DOMAIN=files.example.test \
+            -e ACME_EMAIL=ops@example.test caddy:2.10-alpine caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+
+  app:
+    name: App typecheck, lint, web build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @farmgo/app typecheck
+      - run: pnpm exec biome check apps/app
+      - run: node scripts/copy-lint.mjs
+      - name: Web build
+        run: pnpm --filter @farmgo/app build:web
+        env:
+          NODE_ENV: production
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-web
+          path: apps/app/dist
+          retention-days: 7
+
+  scan:
+    name: Image scan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [api, worker]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/Dockerfile
+          target: ${{ matrix.target }}
+          load: true
+          tags: farmgo/${{ matrix.target }}:scan
+          cache-from: type=gha,scope=${{ matrix.target }}
+      - name: Trivy (fails on fixable high or critical)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: farmgo/${{ matrix.target }}:scan
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          format: table
+
+  images:
+    name: Build and push images
+    needs: [check, app, scan]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - { name: api, context: ., file: infra/Dockerfile, target: api }
+          - { name: worker, context: ., file: infra/Dockerfile, target: worker }
+          - { name: migrate, context: ., file: infra/Dockerfile, target: migrate }
+          - { name: autoscaler, context: infra/autoscaler, file: infra/autoscaler/Dockerfile, target: "" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          target: ${{ matrix.target }}
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/${{ matrix.name }}:${{ github.sha }}
+            ghcr.io/${{ github.repository }}/${{ matrix.name }}:latest
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+
+  deploy:
+    name: Deploy to VPS
+    needs: images
+    runs-on: ubuntu-latest
+    environment: production
+    # Configure DEPLOY_HOST, DEPLOY_USER and DEPLOY_SSH_KEY in the "production" environment,
+    # and set the repository variable DEPLOY_ENABLED=true to turn this on.
+    if: vars.DEPLOY_ENABLED == 'true'
+    steps:
+      - uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          command_timeout: 30m
+          script: |
+            set -e
+            cd /opt/farmgo
+            git fetch --quiet origin main && git checkout --quiet ${{ github.sha }}
+            export IMAGE_REGISTRY=ghcr.io/${{ github.repository }}
+            infra/deploy.sh --pull --tag ${{ github.sha }}

@@ -1,0 +1,26 @@
+{
+  "name": "@farmgo/sdk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Typed, offline-tolerant, realtime-aware client for the FarmGo Connect API. Runs in React Native and the browser.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.test.json",
+    "test": "vitest run",
+    "test:unit": "vitest run --exclude test/**",
+    "test:integration": "vitest run test/"
+  },
+  "dependencies": {
+    "@farmgo/contracts": "workspace:*",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "typescript": "~5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,234 @@
+# Production stack for a single VPS.
+#
+#   cp infra/.env.production.example infra/.env.production   # then fill in every blank
+#   infra/deploy.sh --build                                   # first deploy and every update
+#
+# Images build on the server from this repository (IMAGE_REGISTRY=farmgo) or are pulled from a
+# registry such as GHCR (IMAGE_REGISTRY=ghcr.io/<owner>/<repo>, IMAGE_TAG=<git sha>).
+# Only Caddy publishes ports (80 and 443). Everything else is reachable on the `farmgo` network only.
+name: farmgo-prod
+
+x-app: &app
+  env_file: .env.production
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options: { max-size: "20m", max-file: "5" }
+
+x-build: &build
+  context: ..
+  dockerfile: infra/Dockerfile
+
+networks:
+  default:
+    name: farmgo
+
+services:
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443", "443:443/udp"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../apps/app/dist:/srv/app:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      API_DOMAIN: ${API_DOMAIN:?set API_DOMAIN}
+      APP_DOMAIN: ${APP_DOMAIN:?set APP_DOMAIN}
+      FILES_DOMAIN: ${FILES_DOMAIN:?set FILES_DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL:-}
+    logging:
+      driver: json-file
+      options: { max-size: "20m", max-file: "5" }
+
+  migrate:
+    image: ${IMAGE_REGISTRY:-farmgo}/migrate:${IMAGE_TAG:-latest}
+    build: { <<: *build, target: migrate }
+    env_file: .env.production
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: "no"
+
+  api:
+    <<: *app
+    image: ${IMAGE_REGISTRY:-farmgo}/api:${IMAGE_TAG:-latest}
+    build: { <<: *build, target: api }
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    environment:
+      TRUST_PROXY: "true"
+      # Readiness fails first on SIGTERM; Caddy notices within its 2s health interval.
+      SHUTDOWN_DRAIN_MS: "15000"
+    # Drain (15s) plus in-flight requests (30s request timeout) fit in the grace period.
+    stop_grace_period: 50s
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      start_period: 30s
+      retries: 3
+    deploy:
+      # The starting count. deploy.sh and the autoscaler change it between AUTOSCALE_MIN and AUTOSCALE_MAX.
+      replicas: ${API_REPLICAS:-2}
+      resources:
+        limits: { memory: "${API_MEMORY_LIMIT:-768m}", cpus: "${API_CPU_LIMIT:-1.0}" }
+
+  worker:
+    <<: *app
+    image: ${IMAGE_REGISTRY:-farmgo}/worker:${IMAGE_TAG:-latest}
+    build: { <<: *build, target: worker }
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+    environment:
+      # Nightly jobs scan more rows than a request does.
+      DB_STATEMENT_TIMEOUT_MS: "120000"
+    stop_grace_period: 40s
+    deploy:
+      resources:
+        limits: { memory: "${WORKER_MEMORY_LIMIT:-768m}" }
+
+  postgres:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-farmgo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-farmgo}
+    # Size these to the VPS (see docs/SCALING.md). max_connections must stay above
+    # AUTOSCALE_MAX x DB_POOL_MAX + the worker pool + 10 for backups and maintenance.
+    command:
+      - postgres
+      - -c
+      - max_connections=${PG_MAX_CONNECTIONS:-100}
+      - -c
+      - shared_buffers=${PG_SHARED_BUFFERS:-512MB}
+      - -c
+      - effective_cache_size=${PG_EFFECTIVE_CACHE_SIZE:-1536MB}
+      - -c
+      - work_mem=${PG_WORK_MEM:-8MB}
+      - -c
+      - wal_level=replica
+      - -c
+      - idle_in_transaction_session_timeout=60000
+    volumes: [pgdata:/var/lib/postgresql/data]
+    shm_size: 256m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-farmgo}"]
+      interval: 10s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?set REDIS_PASSWORD}", "--maxmemory-policy", "noeviction"]
+    volumes: [redisdata:/data]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD --no-auth-warning ping | grep PONG"]
+      interval: 10s
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+  minio:
+    # MinIO stopped publishing images to Docker Hub in late 2025; set MINIO_IMAGE to a copy you
+    # host or retag (see docs/OPERATIONS.md, "File storage image").
+    image: ${MINIO_IMAGE:-minio/minio:RELEASE.2025-04-22T22-12-26Z}
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:?set S3_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:?set S3_SECRET_KEY}
+    volumes: [miniodata:/data]
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 15s
+
+  # Nightly logical dumps at 02:00 Nairobi, kept 7 days, 4 weeks and 6 months on this server.
+  backup:
+    image: prodrigestivill/postgres-backup-local:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-farmgo}
+      POSTGRES_USER: ${POSTGRES_USER:-farmgo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_EXTRA_OPTS: "-Z6 --format=custom"
+      BACKUP_SUFFIX: ".dump"
+      SCHEDULE: "0 2 * * *"
+      BACKUP_KEEP_DAYS: 7
+      BACKUP_KEEP_WEEKS: 4
+      BACKUP_KEEP_MONTHS: 6
+      TZ: Africa/Nairobi
+    volumes: ["./backups:/backups"]
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  # Off-site copies: the dumps above and every MinIO bucket, synced to S3-compatible storage at
+  # 03:00 Nairobi. Does nothing until OFFSITE_S3_ENDPOINT is set. See infra/backup/offsite.sh.
+  backup-offsite:
+    image: rclone/rclone:1.68
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "/scripts/offsite.sh", "loop"]
+    env_file: .env.production
+    environment:
+      TZ: Africa/Nairobi
+    volumes:
+      - ./backup:/scripts:ro
+      - ./backups:/backups:ro
+    depends_on:
+      minio: { condition: service_healthy }
+
+  # Only the Docker calls the autoscaler needs: list, inspect, create, start, stop, remove containers.
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy:0.3
+    restart: unless-stopped
+    environment:
+      CONTAINERS: 1
+      POST: 1
+      NETWORKS: 0
+      IMAGES: 0
+      EXEC: 0
+      VOLUMES: 0
+      SERVICES: 0
+      INFO: 0
+    volumes: ["/var/run/docker.sock:/var/run/docker.sock:ro"]
+
+  autoscaler:
+    image: ${IMAGE_REGISTRY:-farmgo}/autoscaler:${IMAGE_TAG:-latest}
+    build: { context: ./autoscaler }
+    restart: unless-stopped
+    environment:
+      DOCKER_HOST: tcp://docker-proxy:2375
+      COMPOSE_PROJECT: farmgo-prod
+      PROMETHEUS_URL: ${PROMETHEUS_URL:-http://prometheus:9090}
+      AUTOSCALE_MIN: ${AUTOSCALE_MIN:-2}
+      AUTOSCALE_MAX: ${AUTOSCALE_MAX:-4}
+      AUTOSCALE_CPU_UP: ${AUTOSCALE_CPU_UP:-70}
+      AUTOSCALE_CPU_DOWN: ${AUTOSCALE_CPU_DOWN:-25}
+      AUTOSCALE_P95_UP_MS: ${AUTOSCALE_P95_UP_MS:-800}
+      AUTOSCALE_P95_DOWN_MS: ${AUTOSCALE_P95_DOWN_MS:-300}
+      AUTOSCALE_UP_COOLDOWN_S: ${AUTOSCALE_UP_COOLDOWN_S:-180}
+      AUTOSCALE_DOWN_COOLDOWN_S: ${AUTOSCALE_DOWN_COOLDOWN_S:-600}
+      AUTOSCALE_INTERVAL_S: ${AUTOSCALE_INTERVAL_S:-20}
+      PG_MAX_CONNECTIONS: ${PG_MAX_CONNECTIONS:-100}
+      DB_POOL_MAX: ${DB_POOL_MAX:-10}
+      WORKER_DB_POOL_MAX: ${DB_POOL_MAX:-10}
+    volumes: ["./state:/state:ro"]
+    depends_on: [docker-proxy]
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    restart: unless-stopped
+    volumes: [kuma:/app/data]
+    ports: ["127.0.0.1:3002:3001"]
+
+volumes:
+  pgdata:
+  redisdata:
+  miniodata:
+  caddy_data:
+  caddy_config:
+  kuma:

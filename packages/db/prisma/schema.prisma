@@ -1,0 +1,1235 @@
+// FarmGo Connect database schema.
+// Conventions:
+//   * Money is stored as integer KES cents (Int). Never Float.
+//   * Quantities are Decimal(12,2).
+//   * Coordinates are stored as lat/lng floats; distance queries use PostGIS
+//     (ST_DWithin / ST_Distance on geography(ST_MakePoint(lng, lat))) via raw SQL.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────────────────
+// Better Auth tables (user, session, account, verification,
+// organization, member, invitation, twoFactor)
+// ─────────────────────────────────────────────────────────────
+
+model User {
+  id                  String    @id
+  name                String
+  email               String    @unique
+  emailVerified       Boolean   @default(false)
+  image               String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  // phoneNumber plugin
+  phoneNumber         String?   @unique
+  phoneNumberVerified Boolean?  @default(false)
+  // admin plugin: `role` is the platform role (see packages/auth/src/permissions.ts)
+  role                String?   @default("user")
+  banned              Boolean?  @default(false)
+  banReason           String?
+  banExpires          DateTime?
+  // twoFactor plugin
+  twoFactorEnabled    Boolean?  @default(false)
+  // FarmGo additional fields
+  preferredLanguage   String    @default("sw")
+  county              String?
+
+  sessions          Session[]
+  accounts          Account[]
+  members           Member[]
+  invitations       Invitation[]
+  twoFactors        TwoFactor[]
+  farmerProfile     FarmerProfile?
+  onboardedFarmers  FarmerProfile[]         @relation("OnboardedBy")
+  demandsCreated    DemandRequest[]         @relation("DemandCreatedBy")
+  ordersCreated     Order[]                 @relation("OrderCreatedBy")
+  checkouts         Checkout[]
+  addresses         Address[]
+  conversationReads ConversationRead[]
+  favorites         Favorite[]
+  ordersAsFarmer    Order[]                 @relation("OrderFarmer")
+  inspections       QualityInspection[]
+  routes            Route[]                 @relation("DriverRoutes")
+  driverLocations   DriverLocation[]
+  payouts           Payout[]
+  notifications     Notification[]
+  notificationPrefs NotificationPreference?
+  devices           DeviceToken[]
+  reviewsWritten    Review[]                @relation("ReviewAuthor")
+  disputesRaised    Dispute[]               @relation("DisputeRaisedBy")
+  disputesResolved  Dispute[]               @relation("DisputeResolvedBy")
+  messages          OrderMessage[]
+  inputOrders       InputOrder[]
+  crateMovements    CrateMovement[]
+  orderEvents       OrderEvent[]
+
+  @@map("user")
+}
+
+model Session {
+  id                   String   @id
+  expiresAt            DateTime
+  token                String   @unique
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  ipAddress            String?
+  userAgent            String?
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeOrganizationId String?
+  impersonatedBy       String?
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model Organization {
+  id          String       @id
+  name        String
+  slug        String       @unique
+  logo        String?
+  createdAt   DateTime     @default(now())
+  metadata    String?
+  members     Member[]
+  invitations Invitation[]
+
+  profile       OrgProfile?
+  demands       DemandRequest[]
+  checkouts     Checkout[]
+  addresses     Address[]
+  cartItems     CartItem[]
+  orders        Order[]
+  invoices      Invoice[]
+  inputProducts InputProduct[]
+  farmerMembers FarmerProfile[] @relation("FarmerGroup")
+
+  @@map("organization")
+}
+
+model Member {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String       @default("member")
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+  @@index([userId])
+  @@map("member")
+}
+
+model Invitation {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           String?
+  status         String       @default("pending")
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+  inviterId      String
+  user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("invitation")
+}
+
+model TwoFactor {
+  id                      String    @id
+  secret                  String
+  backupCodes             String
+  verified                Boolean?  @default(true)
+  failedVerificationCount Int?      @default(0)
+  lockedUntil             DateTime?
+  userId                  String
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([secret])
+  @@map("twoFactor")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Profiles
+// ─────────────────────────────────────────────────────────────
+
+enum OrgType {
+  BUYER
+  FARMER_GROUP
+  INPUT_SUPPLIER
+}
+
+enum BuyerCategory {
+  HOTEL
+  RESTAURANT
+  GUESTHOUSE
+  INSTITUTION
+  CATERER
+  /// An individual or family buying for home (always prepaid).
+  HOUSEHOLD
+  OTHER
+}
+
+enum PaymentTerms {
+  PREPAID
+  NET_7
+  NET_14
+  NET_30
+}
+
+/// Domain data for a Better Auth organization (hotel, farmer cooperative, input supplier).
+model OrgProfile {
+  id             String         @id @default(cuid())
+  organizationId String         @unique
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  type           OrgType
+  buyerCategory  BuyerCategory?
+  county         String
+  town           String?
+  address        String?
+  lat            Float?
+  lng            Float?
+  phone          String?
+  email          String?
+  kraPin         String?
+  paymentTerms   PaymentTerms   @default(PREPAID)
+  creditLimit    Int            @default(0)
+  verified       Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([type, county])
+}
+
+enum KycStatus {
+  PENDING
+  SUBMITTED
+  VERIFIED
+  REJECTED
+}
+
+enum Gender {
+  FEMALE
+  MALE
+  OTHER
+  UNDISCLOSED
+}
+
+model FarmerProfile {
+  id              String        @id @default(cuid())
+  userId          String        @unique
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dateOfBirth     DateTime?
+  gender          Gender        @default(UNDISCLOSED)
+  mpesaNumber     String
+  nationalIdKey   String? // private object key in the kyc bucket
+  kycStatus       KycStatus     @default(PENDING)
+  onboardedById   String?
+  onboardedBy     User?         @relation("OnboardedBy", fields: [onboardedById], references: [id])
+  groupOrgId      String?
+  groupOrg        Organization? @relation("FarmerGroup", fields: [groupOrgId], references: [id])
+  // Reliability stats, refreshed by the worker; used by the matching engine.
+  ordersCompleted Int           @default(0)
+  qaPassRate      Float         @default(1)
+  onTimeRate      Float         @default(1)
+  ratingAvg       Float?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  farms Farm[]
+
+  @@index([onboardedById])
+}
+
+model Farm {
+  id        String        @id @default(cuid())
+  farmerId  String
+  farmer    FarmerProfile @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  name      String
+  county    String
+  ward      String?
+  lat       Float?
+  lng       Float?
+  acreage   Decimal?      @db.Decimal(8, 2)
+  isOrganic Boolean       @default(false)
+  /// Object key of the farm photo (public bucket); the API returns it as `photoUrl`.
+  photoKey  String?
+  active    Boolean       @default(true)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  listings SupplyListing[]
+
+  @@index([county])
+  @@index([farmerId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Catalog
+// ─────────────────────────────────────────────────────────────
+
+enum ProduceCategory {
+  VEGETABLE
+  FRUIT
+  HERB
+  GRAIN
+  LEGUME
+  TUBER
+  DAIRY
+  POULTRY
+  MEAT
+  /// Processed farm products: honey, peanut butter, dried fruit, flour mixes.
+  VALUE_ADDED
+  OTHER
+}
+
+enum Unit {
+  KG
+  CRATE
+  BUNCH
+  PIECE
+  LITRE
+  TRAY
+  BAG
+}
+
+model Produce {
+  id            String          @id @default(cuid())
+  slug          String          @unique
+  name          String          @unique
+  nameSw        String
+  category      ProduceCategory
+  unit          Unit
+  grades        String[]        @default(["A", "B", "C"])
+  shelfLifeDays Int             @default(7)
+  imageKey      String?
+  active        Boolean         @default(true)
+  createdAt     DateTime        @default(now())
+
+  listings  SupplyListing[]
+  demands   DemandRequest[]
+  prices    PricePoint[]
+  forecasts DemandForecast[]
+
+  // Fuzzy search in English and Kiswahili (pg_trgm)
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "produce_name_trgm")
+  @@index([nameSw(ops: raw("gin_trgm_ops"))], type: Gin, map: "produce_name_sw_trgm")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Supply & Demand
+// ─────────────────────────────────────────────────────────────
+
+enum ListingStatus {
+  DRAFT
+  OPEN
+  PARTIALLY_MATCHED
+  FULLY_MATCHED
+  EXPIRED
+  CANCELLED
+}
+
+model SupplyListing {
+  id            String        @id @default(cuid())
+  farmId        String
+  farm          Farm          @relation(fields: [farmId], references: [id])
+  produceId     String
+  produce       Produce       @relation(fields: [produceId], references: [id])
+  quantity      Decimal       @db.Decimal(12, 2)
+  quantityLeft  Decimal       @db.Decimal(12, 2)
+  grade         String?
+  pricePerUnit  Int
+  availableFrom DateTime
+  availableTo   DateTime
+  harvestReady  Boolean       @default(false)
+  status        ListingStatus @default(OPEN)
+  photos        String[]      @default([])
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  matches    Match[]
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+
+  @@index([produceId, status, availableFrom])
+  @@index([farmId, status])
+}
+
+enum DemandStatus {
+  OPEN
+  PARTIALLY_FILLED
+  /// Paused by the buyer: out of matching and the demand board until resumed.
+  PAUSED
+  FILLED
+  EXPIRED
+  CANCELLED
+}
+
+model DemandRequest {
+  id              String          @id @default(cuid())
+  buyerOrgId      String
+  buyerOrg        Organization    @relation(fields: [buyerOrgId], references: [id])
+  createdById     String
+  createdBy       User            @relation("DemandCreatedBy", fields: [createdById], references: [id])
+  produceId       String
+  produce         Produce         @relation(fields: [produceId], references: [id])
+  quantity        Decimal         @db.Decimal(12, 2)
+  quantityFilled  Decimal         @default(0) @db.Decimal(12, 2)
+  minGrade        String?
+  maxPricePerUnit Int?
+  neededBy        DateTime
+  /// RFC 5545 RRULE for recurring requirements, e.g. "FREQ=WEEKLY;BYDAY=MO".
+  /// Recurring templates spawn concrete child requests ahead of time.
+  recurrence      String?
+  recurrenceUntil DateTime?
+  parentId        String?
+  parent          DemandRequest?  @relation("DemandRecurrence", fields: [parentId], references: [id])
+  children        DemandRequest[] @relation("DemandRecurrence")
+  county          String
+  deliveryLat     Float?
+  deliveryLng     Float?
+  notes           String?
+  status          DemandStatus    @default(OPEN)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  matches Match[]
+
+  @@unique([parentId, neededBy])
+  @@index([produceId, status, neededBy])
+  @@index([buyerOrgId, status])
+  @@index([county, status])
+}
+
+enum MatchStatus {
+  PROPOSED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+model Match {
+  id               String        @id @default(cuid())
+  demandId         String
+  demand           DemandRequest @relation(fields: [demandId], references: [id])
+  listingId        String
+  listing          SupplyListing @relation(fields: [listingId], references: [id])
+  quantity         Decimal       @db.Decimal(12, 2)
+  pricePerUnit     Int
+  score            Float
+  scoreBreakdown   Json?
+  distanceKm       Float?
+  status           MatchStatus   @default(PROPOSED)
+  buyerAcceptedAt  DateTime?
+  farmerAcceptedAt DateTime?
+  expiresAt        DateTime
+  createdByAdminId String? // set when an admin overrides / creates manually
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  orderItem OrderItem?
+
+  @@unique([demandId, listingId])
+  @@index([status, expiresAt])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Orders
+// ─────────────────────────────────────────────────────────────
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  READY_FOR_QA
+  QA_PASSED
+  QA_REJECTED
+  IN_TRANSIT
+  DELIVERED
+  DISPUTED
+  PAID
+  REFUNDED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PENDING
+  PAID
+  PARTIALLY_REFUNDED
+  REFUNDED
+}
+
+model Order {
+  id                 String        @id @default(cuid())
+  code               String        @unique
+  buyerOrgId         String
+  buyerOrg           Organization  @relation(fields: [buyerOrgId], references: [id])
+  createdById        String
+  createdBy          User          @relation("OrderCreatedBy", fields: [createdById], references: [id])
+  /// One order = one buyer + one farmer, so confirmation, QA and payout are per farmer.
+  farmerId           String
+  farmer             User          @relation("OrderFarmer", fields: [farmerId], references: [id])
+  status             OrderStatus   @default(PENDING)
+  paymentStatus      PaymentStatus @default(UNPAID)
+  paymentTerms       PaymentTerms  @default(PREPAID)
+  subtotal           Int
+  deliveryFee        Int
+  commission         Int
+  total              Int
+  /// Amount owed for accepted quantity after QA (defaults to subtotal).
+  acceptedSubtotal   Int?
+  deliveryDate       DateTime
+  deliveryLat        Float?
+  deliveryLng        Float?
+  deliveryAddress    String?
+  notes              String?
+  cancelReason       String?
+  /// Set when the order first reaches DELIVERED; starts the buyer's dispute window.
+  deliveredAt        DateTime?
+  /// Buyer confirmed the goods are fine, which settles the order before the window ends.
+  receiptConfirmedAt DateTime?
+  invoiceId          String?
+  invoice            Invoice?      @relation(fields: [invoiceId], references: [id])
+  /// Set when the order was placed with others in one cart checkout (one payment for all).
+  checkoutId         String?
+  checkout           Checkout?     @relation(fields: [checkoutId], references: [id])
+  /// Delivery window on deliveryDate, e.g. "06:00-08:00" (Africa/Nairobi).
+  deliveryWindow     String?
+  routeId            String?
+  route              Route?        @relation(fields: [routeId], references: [id])
+  version            Int           @default(0)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  items      OrderItem[]
+  events     OrderEvent[]
+  payments   Payment[]
+  payout     Payout?
+  reviews    Review[]
+  disputes   Dispute[]
+  messages   OrderMessage[]
+  stops      Delivery[]
+  crateMoves CrateMovement[]
+  reads      ConversationRead[]
+
+  @@index([buyerOrgId, status])
+  @@index([farmerId, status])
+  @@index([status, deliveryDate])
+  @@index([checkoutId])
+}
+
+model OrderItem {
+  id           String             @id @default(cuid())
+  orderId      String
+  order        Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  matchId      String?            @unique
+  match        Match?             @relation(fields: [matchId], references: [id])
+  listingId    String
+  listing      SupplyListing      @relation(fields: [listingId], references: [id])
+  produceId    String
+  quantity     Decimal            @db.Decimal(12, 2)
+  pricePerUnit Int
+  lineTotal    Int
+  inspection   QualityInspection?
+}
+
+/// A shop-style cart checkout: produce from several farmers, one delivery fee, one payment.
+/// It creates one order per farmer so confirmation, QA and payouts stay per farmer.
+model Checkout {
+  id              String       @id @default(cuid())
+  buyerOrgId      String
+  buyerOrg        Organization @relation(fields: [buyerOrgId], references: [id])
+  createdById     String
+  createdBy       User         @relation(fields: [createdById], references: [id])
+  subtotal        Int
+  deliveryFee     Int
+  total           Int
+  /// MPESA | CARD | INVOICE
+  paymentMethod   String
+  deliveryDate    DateTime
+  deliveryWindow  String?
+  deliveryAddress String?
+  deliveryLat     Float?
+  deliveryLng     Float?
+  notes           String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  orders   Order[]
+  payments Payment[]
+
+  @@index([buyerOrgId, createdAt])
+}
+
+/// A saved delivery address. A buyer's addresses belong to their organization (shared by its
+/// members); anyone else's belong to the user. One default per owner.
+model Address {
+  id           String        @id @default(cuid())
+  orgId        String?
+  org          Organization? @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label        String
+  county       String
+  town         String?
+  line1        String
+  landmark     String?
+  lat          Float?
+  lng          Float?
+  instructions String?
+  isDefault    Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([orgId])
+  @@index([userId])
+}
+
+enum FavoriteKind {
+  LISTING
+  FARMER
+  PRODUCE
+  CATEGORY
+}
+
+/// Something a user starred: a listing, a farmer (profile id), a produce item or an app category slug.
+model Favorite {
+  id        String       @id @default(cuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      FavoriteKind
+  targetId  String
+  createdAt DateTime     @default(now())
+
+  @@unique([userId, kind, targetId])
+  @@index([userId, createdAt])
+}
+
+/// Server-side cart, per buyer organization, so it follows the user across devices.
+/// Never reserves stock: prices and availability are re-checked at quote and checkout.
+model CartItem {
+  id         String        @id @default(cuid())
+  buyerOrgId String
+  buyerOrg   Organization  @relation(fields: [buyerOrgId], references: [id], onDelete: Cascade)
+  listingId  String
+  listing    SupplyListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  quantity   Decimal       @db.Decimal(12, 2)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@unique([buyerOrgId, listingId])
+}
+
+/// Append-only order status history.
+model OrderEvent {
+  id        String       @id @default(cuid())
+  orderId   String
+  order     Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  from      OrderStatus?
+  to        OrderStatus
+  actorId   String?
+  actor     User?        @relation(fields: [actorId], references: [id])
+  note      String?
+  createdAt DateTime     @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+model OrderMessage {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  body      String
+  photos    String[] @default([])
+  createdAt DateTime @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+/// When each participant last opened an order's chat; messages after it are unread for them.
+/// Per user, so every member of a buyer organization has their own unread count.
+model ConversationRead {
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lastReadAt DateTime
+
+  @@id([orderId, userId])
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Quality assurance
+// ─────────────────────────────────────────────────────────────
+
+model QualityInspection {
+  id           String    @id @default(cuid())
+  orderItemId  String    @unique
+  orderItem    OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  inspectorId  String
+  inspector    User      @relation(fields: [inspectorId], references: [id])
+  grade        String
+  passed       Boolean
+  acceptedQty  Decimal   @db.Decimal(12, 2)
+  rejectedQty  Decimal   @default(0) @db.Decimal(12, 2)
+  rejectReason String?
+  checklist    Json?
+  notes        String?
+  photos       String[]  @default([])
+  location     String? // FARM_GATE | AGGREGATION_CENTRE | BUYER_DOOR
+  inspectedAt  DateTime  @default(now())
+}
+
+// ─────────────────────────────────────────────────────────────
+// Logistics
+// ─────────────────────────────────────────────────────────────
+
+enum RouteStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Route {
+  id          String      @id @default(cuid())
+  code        String      @unique
+  driverId    String?
+  driver      User?       @relation("DriverRoutes", fields: [driverId], references: [id])
+  date        DateTime    @db.Date
+  county      String
+  status      RouteStatus @default(PLANNED)
+  vehicle     String?
+  distanceKm  Float?
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  stops     Delivery[]
+  orders    Order[]
+  locations DriverLocation[]
+
+  @@index([driverId, date])
+  @@index([date, status])
+}
+
+enum StopKind {
+  PICKUP
+  DROPOFF
+}
+
+enum StopStatus {
+  PENDING
+  ARRIVED
+  COMPLETED
+  FAILED
+  SKIPPED
+}
+
+/// A single stop on a route: a pickup at a farm or a drop-off at a buyer.
+model Delivery {
+  id              String     @id @default(cuid())
+  routeId         String
+  route           Route      @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  orderId         String
+  order           Order      @relation(fields: [orderId], references: [id])
+  kind            StopKind
+  sequence        Int
+  lat             Float?
+  lng             Float?
+  address         String?
+  status          StopStatus @default(PENDING)
+  eta             DateTime?
+  arrivedAt       DateTime?
+  completedAt     DateTime?
+  podPhotoKey     String?
+  signatureKey    String?
+  recipientName   String?
+  failureReason   String?
+  cratesDropped   Int        @default(0)
+  cratesCollected Int        @default(0)
+
+  crateMoves CrateMovement[]
+
+  @@unique([orderId, kind])
+  @@index([routeId, sequence])
+}
+
+model DriverLocation {
+  id         BigInt   @id @default(autoincrement())
+  routeId    String
+  route      Route    @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  driverId   String
+  driver     User     @relation(fields: [driverId], references: [id])
+  lat        Float
+  lng        Float
+  heading    Float?
+  speedKph   Float?
+  recordedAt DateTime @default(now())
+
+  @@index([routeId, recordedAt])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Reusable packaging
+// ─────────────────────────────────────────────────────────────
+
+enum CrateStatus {
+  IN_STOCK
+  WITH_FARMER
+  IN_TRANSIT
+  WITH_BUYER
+  LOST
+  RETIRED
+}
+
+model Crate {
+  id           String      @id @default(cuid())
+  qrCode       String      @unique
+  size         String      @default("STANDARD")
+  status       CrateStatus @default(IN_STOCK)
+  holderUserId String?
+  holderOrgId  String?
+  depositCents Int         @default(0)
+  lastSeenAt   DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  movements CrateMovement[]
+
+  @@index([status])
+  @@index([holderOrgId])
+  @@index([holderUserId])
+}
+
+model CrateMovement {
+  id          String      @id @default(cuid())
+  crateId     String
+  crate       Crate       @relation(fields: [crateId], references: [id], onDelete: Cascade)
+  orderId     String?
+  order       Order?      @relation(fields: [orderId], references: [id])
+  deliveryId  String?
+  delivery    Delivery?   @relation(fields: [deliveryId], references: [id])
+  from        CrateStatus
+  to          CrateStatus
+  scannedById String
+  scannedBy   User        @relation(fields: [scannedById], references: [id])
+  toUserId    String?
+  toOrgId     String?
+  note        String?
+  createdAt   DateTime    @default(now())
+
+  @@index([crateId, createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Payments
+// ─────────────────────────────────────────────────────────────
+
+enum PaymentMethod {
+  MPESA_STK
+  /// Card or mobile money through the card provider's hosted page (Pesapal).
+  CARD
+  INVOICE
+  BANK_TRANSFER
+  CASH
+}
+
+enum TxStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELLED
+  TIMEOUT
+}
+
+/// Buyer to platform payment. Rows are never edited after SUCCESS; refunds are new rows.
+model Payment {
+  id                String        @id @default(cuid())
+  orderId           String?
+  order             Order?        @relation(fields: [orderId], references: [id])
+  invoiceId         String?
+  invoice           Invoice?      @relation(fields: [invoiceId], references: [id])
+  /// One collection for a whole cart checkout (orderId is null on that row).
+  checkoutId        String?
+  checkout          Checkout?     @relation(fields: [checkoutId], references: [id])
+  /// Set on the per-order share of a checkout payment: the id of the checkout payment it came from.
+  /// Allocations are ledger entries, not separate money movements.
+  allocatedFromId   String?
+  /// Collection or refund for a green-input order.
+  inputOrderId      String?
+  inputOrder        InputOrder?   @relation(fields: [inputOrderId], references: [id])
+  method            PaymentMethod
+  direction         String        @default("IN") // IN = collection, OUT = refund
+  amount            Int
+  phoneNumber       String?
+  status            TxStatus      @default(PENDING)
+  mpesaReceipt      String?       @unique
+  checkoutRequestId String?       @unique
+  merchantRequestId String?
+  resultCode        String?
+  resultDesc        String?
+  idempotencyKey    String        @unique
+  initiatedById     String?
+  raw               Json?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([orderId])
+  @@index([checkoutId])
+  @@index([status, createdAt])
+}
+
+/// Platform to farmer payout (M-Pesa B2C).
+model Payout {
+  id                       String      @id @default(cuid())
+  /// One payout per produce order, or per green-input order (exactly one of the two is set).
+  orderId                  String?     @unique
+  order                    Order?      @relation(fields: [orderId], references: [id])
+  inputOrderId             String?     @unique
+  inputOrder               InputOrder? @relation(fields: [inputOrderId], references: [id])
+  /// The payee: the farmer, or the owner of the green-input supplier organization.
+  farmerId                 String
+  farmer                   User        @relation(fields: [farmerId], references: [id])
+  phoneNumber              String
+  grossAmount              Int
+  commission               Int
+  amount                   Int
+  status                   TxStatus    @default(PENDING)
+  mpesaReceipt             String?     @unique
+  conversationId           String?     @unique
+  originatorConversationId String?     @unique
+  resultCode               String?
+  resultDesc               String?
+  attempts                 Int         @default(0)
+  idempotencyKey           String      @unique
+  raw                      Json?
+  createdAt                DateTime    @default(now())
+  updatedAt                DateTime    @updatedAt
+
+  @@index([farmerId, status])
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  VOID
+}
+
+model Invoice {
+  id          String        @id @default(cuid())
+  number      String        @unique
+  buyerOrgId  String
+  buyerOrg    Organization  @relation(fields: [buyerOrgId], references: [id])
+  periodStart DateTime
+  periodEnd   DateTime
+  subtotal    Int
+  total       Int
+  amountPaid  Int           @default(0)
+  status      InvoiceStatus @default(DRAFT)
+  issuedAt    DateTime?
+  dueAt       DateTime?
+  pdfKey      String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  orders   Order[]
+  payments Payment[]
+
+  @@index([buyerOrgId, status])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Disputes & reviews
+// ─────────────────────────────────────────────────────────────
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED_REFUND
+  RESOLVED_NO_REFUND
+  CANCELLED
+}
+
+model Dispute {
+  id           String        @id @default(cuid())
+  /// A produce order or a green-input order (exactly one of the two is set).
+  orderId      String?
+  order        Order?        @relation(fields: [orderId], references: [id])
+  inputOrderId String?
+  inputOrder   InputOrder?   @relation(fields: [inputOrderId], references: [id])
+  raisedById   String
+  raisedBy     User          @relation("DisputeRaisedBy", fields: [raisedById], references: [id])
+  reason       String // QUALITY | QUANTITY | LATE | DAMAGED | OTHER
+  description  String
+  photos       String[]      @default([])
+  status       DisputeStatus @default(OPEN)
+  refundAmount Int?
+  resolution   String?
+  resolvedById String?
+  resolvedBy   User?         @relation("DisputeResolvedBy", fields: [resolvedById], references: [id])
+  resolvedAt   DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([status])
+}
+
+model Review {
+  id           String   @id @default(cuid())
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id])
+  authorId     String
+  author       User     @relation("ReviewAuthor", fields: [authorId], references: [id])
+  targetUserId String?
+  targetOrgId  String?
+  rating       Int
+  comment      String?
+  createdAt    DateTime @default(now())
+
+  @@unique([orderId, authorId])
+  @@index([targetUserId])
+  @@index([targetOrgId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Pricing & forecasting
+// ─────────────────────────────────────────────────────────────
+
+model PricePoint {
+  id         String   @id @default(cuid())
+  produceId  String
+  produce    Produce  @relation(fields: [produceId], references: [id])
+  county     String
+  week       DateTime @db.Date
+  avgPrice   Int
+  minPrice   Int
+  maxPrice   Int
+  volume     Decimal  @db.Decimal(14, 2)
+  sampleSize Int
+  createdAt  DateTime @default(now())
+
+  @@unique([produceId, county, week])
+  @@index([produceId, week])
+}
+
+model DemandForecast {
+  id          String   @id @default(cuid())
+  produceId   String
+  produce     Produce  @relation(fields: [produceId], references: [id])
+  county      String
+  week        DateTime @db.Date
+  forecastQty Decimal  @db.Decimal(14, 2)
+  method      String // e.g. SEASONAL_MA
+  createdAt   DateTime @default(now())
+
+  @@unique([produceId, county, week])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Green inputs marketplace
+// ─────────────────────────────────────────────────────────────
+
+enum InputCategory {
+  COMPOST
+  ORGANIC_FERTILIZER
+  SEEDLINGS
+  BIOPESTICIDE
+  PACKAGING
+  OTHER
+}
+
+model InputProduct {
+  id            String        @id @default(cuid())
+  supplierOrgId String
+  supplierOrg   Organization  @relation(fields: [supplierOrgId], references: [id])
+  name          String
+  description   String?
+  category      InputCategory
+  unit          Unit
+  pricePerUnit  Int
+  stock         Decimal       @db.Decimal(12, 2)
+  isOrganic     Boolean       @default(true)
+  photos        String[]      @default([])
+  county        String
+  active        Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  orders InputOrder[]
+
+  @@index([category, county, active])
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "input_product_name_trgm")
+}
+
+enum InputOrderStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  DISPATCHED
+  DELIVERED
+  CANCELLED
+}
+
+model InputOrder {
+  id                 String           @id @default(cuid())
+  productId          String
+  product            InputProduct     @relation(fields: [productId], references: [id])
+  buyerId            String
+  buyer              User             @relation(fields: [buyerId], references: [id])
+  quantity           Decimal          @db.Decimal(12, 2)
+  pricePerUnit       Int
+  total              Int
+  status             InputOrderStatus @default(PENDING)
+  /// Paid by M-Pesa when ordering and held until the buyer has the goods (like produce orders).
+  paymentStatus      PaymentStatus    @default(UNPAID)
+  deliveryNote       String?
+  dispatchedAt       DateTime?
+  deliveredAt        DateTime?
+  /// The buyer confirmed the goods arrived, which releases the supplier's payout at once.
+  receiptConfirmedAt DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  payments Payment[]
+  payout   Payout?
+  disputes Dispute[]
+
+  @@index([buyerId])
+  @@index([status, dispatchedAt])
+  @@index([productId, status])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Notifications
+// ─────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  body      String
+  data      Json?
+  channels  String[]  @default([])
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt, createdAt])
+}
+
+model NotificationPreference {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sms       Boolean  @default(true)
+  push      Boolean  @default(true)
+  email     Boolean  @default(true)
+  quietFrom Int? // hour of day (EAT), e.g. 21
+  quietTo   Int? // hour of day (EAT), e.g. 6
+  updatedAt DateTime @updatedAt
+}
+
+model DeviceToken {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token      String   @unique
+  platform   String // ios | android | web
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Infrastructure
+// ─────────────────────────────────────────────────────────────
+
+model PlatformSetting {
+  key       String   @id
+  value     Json
+  updatedBy String?
+  updatedAt DateTime @updatedAt
+}
+
+/// Transactional outbox: written in the same transaction as the state change,
+/// relayed to Redis pub/sub and job queues by the worker.
+model OutboxEvent {
+  id          BigInt    @id @default(autoincrement())
+  type        String
+  aggregateId String?
+  payload     Json
+  createdAt   DateTime  @default(now())
+  processedAt DateTime?
+  attempts    Int       @default(0)
+  lastError   String?
+
+  @@index([processedAt, id])
+}
+
+model AuditLog {
+  id        BigInt   @id @default(autoincrement())
+  actorId   String?
+  action    String
+  entity    String
+  entityId  String
+  before    Json?
+  after     Json?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([actorId, createdAt])
+}

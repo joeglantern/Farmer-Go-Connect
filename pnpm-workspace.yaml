@@ -1,0 +1,22 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+onlyBuiltDependencies:
+  - "@prisma/engines"
+  - prisma
+  - esbuild
+  - "@biomejs/biome"
+  - cpu-features
+  - ssh2
+  - protobufjs
+# Patched versions of transitive dependencies flagged by `pnpm audit --audit-level high`.
+overrides:
+  mysql2: ^3.22.0
+  deepmerge-ts: ^8.0.0
+  "undici@>=7.0.0 <7.29.1": ^7.29.1
+# Advisories with no patched release, in build-time tooling only (Expo CLI in apps/app, never in
+# the API or worker images). Review on every Expo upgrade and remove when a fix ships.
+auditConfig:
+  ignoreGhsas:
+    - GHSA-86w9-cpqp-85rv # node-forge via expo > @expo/cli
+    - GHSA-vfj7-8cjw-p6xm # braces via expo > @expo/cli > metro file map

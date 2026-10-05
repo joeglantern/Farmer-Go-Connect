@@ -1,0 +1,32 @@
+{
+  "name": "@farmgo/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Domain logic and infrastructure shared by the API and the worker.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1137.0",
+    "@aws-sdk/s3-request-presigner": "^3.1137.0",
+    "@farmgo/config": "workspace:*",
+    "@farmgo/contracts": "workspace:*",
+    "@farmgo/db": "workspace:*",
+    "bullmq": "^5.58.0",
+    "ioredis": "^5.7.0",
+    "nodemailer": "^10.0.14",
+    "pino": "^9.9.0",
+    "rrule": "^2.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "@types/nodemailer": "^7.0.1",
+    "typescript": "~5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalEnv": ["NODE_ENV"],
+  "globalDependencies": [".env"],
+  "tasks": {
+    "generate": {
+      "cache": false
+    },
+    "build": {
+      "dependsOn": ["^build", "generate"],
+      "outputs": ["dist/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["generate"]
+    },
+    "test": {
+      "dependsOn": ["generate"],
+      "cache": false
+    },
+    "dev": {
+      "dependsOn": ["generate"],
+      "cache": false,
+      "persistent": true
+    }
+  },
+  "globalPassThroughEnv": [
+    "API_URL",
+    "CHROME",
+    "CRAWL_PASSWORD",
+    "DEMO_PASSWORD",
+    "SAFE_AREA",
+    "SHOT_LOGS",
+    "SMOKE_MPESA_PHONE"
+  ]
+}

@@ -1,0 +1,32 @@
+# FarmGo Connect in shared-host mode: the host nginx owns ports 80 and 443 and forwards the
+# three FarmGo hostnames to FarmGo's Caddy on a local port. Installed by install-nginx.sh as
+# its own file; it does not change any other site. certbot adds the HTTPS listeners.
+map $http_upgrade $farmgo_connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name __API_DOMAIN__ __APP_DOMAIN__ __FILES_DOMAIN__;
+
+    # Photos are capped at 12 MB by the API; leave a little room for the request envelope.
+    client_max_body_size 13m;
+
+    location / {
+        proxy_pass http://127.0.0.1:__CADDY_LOCAL_PORT__;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Real-IP $remote_addr;
+        # WebSockets (/ws) for live order updates and chat.
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $farmgo_connection_upgrade;
+        proxy_read_timeout 120s;
+        proxy_send_timeout 60s;
+        # Do not let nginx log query strings with tokens: Caddy keeps the redacted log.
+        access_log off;
+    }
+}

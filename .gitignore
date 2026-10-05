@@ -1,0 +1,22 @@
+node_modules
+dist
+.turbo
+.env
+.env.*.local
+**/generated
+coverage
+*.log
+
+# Local-only material: large source documents and raw generated art
+*.pptx
+*.pdf
+PLAN.html
+design/generated/
+apps/app/dist/
+.env.production
+infra/.env.production
+backups/
+
+# Route crawler screenshots (scripts/crawl.mjs)
+docs/qa/crawl-shots/
+

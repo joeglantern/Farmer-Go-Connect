@@ -1,0 +1,24 @@
+{
+  "name": "@farmgo/auth",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./permissions": "./src/permissions.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@better-auth/expo": "1.7.5",
+    "@farmgo/config": "workspace:*",
+    "@farmgo/contracts": "workspace:*",
+    "@farmgo/db": "workspace:*",
+    "better-auth": "1.7.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "typescript": "~5.9.2"
+  }
+}

@@ -1,0 +1,101 @@
+{
+	email {$ACME_EMAIL}
+	servers {
+		# Keep the client address from a proxy in front (the host nginx in shared-host mode).
+		# Only private addresses are trusted, so a client on the internet cannot spoof it.
+		trusted_proxies static private_ranges
+	}
+}
+
+# Shared access log settings. Logs never keep secrets: webhook and WebSocket tokens ride in the
+# query string, and sessions in the Authorization, Cookie and Sec-WebSocket-Protocol headers.
+(access_log) {
+	log {
+		output stdout
+		format filter {
+			wrap json
+			request>uri query {
+				replace token [redacted]
+				replace access_token [redacted]
+				replace code [redacted]
+				replace otp [redacted]
+			}
+			request>headers>Authorization delete
+			request>headers>Cookie delete
+			request>headers>Sec-Websocket-Protocol delete
+			resp_headers>Set-Cookie delete
+			resp_headers>Set-Auth-Token delete
+		}
+	}
+}
+
+# SITE_SCHEME is empty (automatic HTTPS) unless shared-host mode sets it to http://.
+
+# API: REST, Better Auth, WebSockets (/ws) and webhooks.
+{$SITE_SCHEME}{$API_DOMAIN} {
+	encode zstd gzip
+	import access_log
+
+	# Metrics, the job dashboard and the API reference stay off the public hostname.
+	@private path /metrics /metrics/* /admin/queues /admin/queues/*
+	respond @private 404
+
+	reverse_proxy {
+		# Every `api` replica, found through Docker DNS. New replicas join within `refresh`.
+		dynamic a api 4000 {
+			refresh 5s
+		}
+		lb_policy least_conn
+
+		# Active checks: a replica that is starting or draining (503) gets no new requests.
+		health_uri /health/ready
+		health_interval 2s
+		health_timeout 2s
+		health_status 200
+
+		# Passive checks and retries: a request that cannot reach a replica that just went away is
+		# sent to another one. Only failures before the request was written are retried.
+		fail_duration 10s
+		max_fails 1
+		lb_try_duration 10s
+		lb_try_interval 250ms
+
+		transport http {
+			# Shorter than the API's keep-alive (65s), so Caddy never reuses a socket the API closed.
+			keepalive 30s
+			dial_timeout 3s
+		}
+		header_up X-Request-Id {http.request.uuid}
+	}
+}
+
+# The web app: a static export of apps/app with a single-page fallback.
+{$SITE_SCHEME}{$APP_DOMAIN} {
+	encode zstd gzip
+	import access_log
+	root * /srv/app
+
+	# Hashed build assets never change; everything else is checked on each visit.
+	@hashed path /_expo/static/* /assets/*
+	header @hashed Cache-Control "public, max-age=31536000, immutable"
+	header ?Cache-Control "no-cache"
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		X-Frame-Options DENY
+	}
+
+	try_files {path} {path}.html {path}/index.html /index.html
+	file_server
+}
+
+# Public hostname for presigned upload and download URLs (S3_PUBLIC_ENDPOINT).
+{$SITE_SCHEME}{$FILES_DOMAIN} {
+	import access_log
+	request_body {
+		max_size 12MB
+	}
+	reverse_proxy minio:9000 {
+		header_up Host {upstream_hostport}
+	}
+}

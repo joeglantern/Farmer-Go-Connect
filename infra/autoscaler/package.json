@@ -1,0 +1,10 @@
+{
+  "name": "@farmgo/autoscaler",
+  "private": true,
+  "type": "module",
+  "description": "Scales the API replicas on one Docker host from CPU and p95 latency.",
+  "scripts": {
+    "start": "node index.mjs",
+    "test": "node --test decide.test.mjs"
+  }
+}

@@ -1,0 +1,21 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  # Every API replica, found through Docker DNS on the farmgo network.
+  - job_name: farmgo-api
+    metrics_path: /metrics
+    authorization:
+      credentials_file: /etc/prometheus/metrics_token
+    dns_sd_configs:
+      - names: [api]
+        type: A
+        port: 4000
+        refresh_interval: 15s
+
+  - job_name: farmgo-worker
+    metrics_path: /metrics
+    authorization:
+      credentials_file: /etc/prometheus/metrics_token
+    static_configs:
+      - targets: ["worker:4001"]

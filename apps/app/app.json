@@ -1,0 +1,95 @@
+{
+  "expo": {
+    "name": "FarmGo Connect",
+    "slug": "farmgo-connect",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/images/icon.png",
+    "scheme": "farmgo",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#F4F7F3",
+    "ios": {
+      "bundleIdentifier": "ke.eyaam.farmgo",
+      "supportsTablet": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "buildNumber": "1"
+    },
+    "android": {
+      "package": "ke.eyaam.farmgo",
+      "adaptiveIcon": {
+        "backgroundColor": "#EEF5E9",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": true,
+      "softwareKeyboardLayoutMode": "resize",
+      "versionCode": 1
+    },
+    "web": {
+      "output": "single",
+      "bundler": "metro",
+      "favicon": "./assets/images/favicon.png",
+      "name": "FarmGo Connect",
+      "shortName": "FarmGo",
+      "themeColor": "#0E3B22",
+      "backgroundColor": "#F4F7F3"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F4F7F3",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 120,
+          "dark": {
+            "backgroundColor": "#0B1510",
+            "image": "./assets/images/splash-icon.png"
+          }
+        }
+      ],
+      "expo-secure-store",
+      "expo-localization",
+      "expo-sharing",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "FarmGo uses the camera to take produce, inspection and delivery photos and to scan crate codes.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "FarmGo uses your location to pin your farm or delivery address and to show live delivery tracking."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "FarmGo lets you choose photos of your produce, farm and documents."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#1C6536"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "eyaam": "A project of EYAAM, Envisioned Youth and Adolescent Ambassadors on the Move"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "@farmgo/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --clear-screen=false src/main.ts",
+    "start": "node dist/main.js",
+    "build": "tsup",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@farmgo/config": "workspace:*",
+    "@farmgo/contracts": "workspace:*",
+    "@farmgo/core": "workspace:*",
+    "@farmgo/db": "workspace:*",
+    "@sentry/node": "^10.10.0",
+    "bullmq": "^5.58.0",
+    "ioredis": "^5.7.0",
+    "pg": "^8.16.0",
+    "prom-client": "^15.1.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "@types/pg": "^8.15.0",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.0",
+    "typescript": "~5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

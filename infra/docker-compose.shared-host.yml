@@ -1,0 +1,14 @@
+# Shared-host mode: for a server that already runs another web server on ports 80 and 443.
+# Caddy listens on a local port over plain HTTP, and the host's own web server (nginx in
+# infra/nginx/) terminates HTTPS and forwards the FarmGo hostnames to it. Turned on by
+# SHARED_HOST=true in .env.production; deploy.sh and restore.sh then add this file.
+services:
+  caddy:
+    ports: !override ["127.0.0.1:${CADDY_LOCAL_PORT:-8180}:80"]
+    environment:
+      SITE_SCHEME: "http://"
+      # Caddy never requests certificates here (nginx does), but its config needs some address.
+      ACME_EMAIL: "unused@shared-host.invalid"
+
+  uptime-kuma:
+    ports: !override ["127.0.0.1:${KUMA_LOCAL_PORT:-3392}:3001"]

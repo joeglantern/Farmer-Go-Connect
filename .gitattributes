@@ -1,0 +1,10 @@
+# Keep LF everywhere so Biome and shell scripts behave the same on Windows and Linux.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.webp binary
+*.ttf binary
+*.otf binary
+*.ico binary
+*.pdf binary
+*.pptx binary
