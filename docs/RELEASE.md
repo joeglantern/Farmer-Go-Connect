@@ -16,7 +16,7 @@ Every setting the app reads is an `EXPO_PUBLIC_*` variable, listed with explanat
 | Variable | Tester value |
 |---|---|
 | `EXPO_PUBLIC_API_URL` | `https://api.<host>` (the VPS, see docs/OPERATIONS.md) |
-| `EXPO_PUBLIC_SUPPORT_EMAIL`, `_PHONE`, `_WHATSAPP` | Shown in Profile when set |
+| `EXPO_PUBLIC_SUPPORT_EMAIL`, `_PHONE`, `_WHATSAPP` | Shown in Profile when set. Add them to `build.base.env` only with a real value: EAS rejects empty strings |
 | `EXPO_PUBLIC_TERMS_URL`, `_PRIVACY_URL` | Shown in Profile when set |
 | `EXPO_PUBLIC_MAP_TILES`, `_MAP_ATTRIBUTION` | Empty uses OpenStreetMap, fine for testing |
 
