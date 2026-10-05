@@ -26,7 +26,13 @@
       },
       "predictiveBackGestureEnabled": true,
       "softwareKeyboardLayoutMode": "resize",
-      "versionCode": 1
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ],
+      "blockedPermissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {
       "output": "single",
@@ -70,7 +76,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "FarmGo lets you choose photos of your produce, farm and documents."
+          "photosPermission": "FarmGo lets you choose photos of your produce, farm and documents.",
+          "microphonePermission": false
         }
       ],
       [
@@ -86,10 +93,17 @@
       "reactCompiler": true
     },
     "extra": {
-      "eyaam": "A project of EYAAM, Envisioned Youth and Adolescent Ambassadors on the Move"
+      "eyaam": "A project of EYAAM, Envisioned Youth and Adolescent Ambassadors on the Move",
+      "eas": {
+        "projectId": "e451361c-3579-4421-9717-719cd8df936b"
+      }
     },
     "runtimeVersion": {
       "policy": "appVersion"
+    },
+    "owner": "afosi",
+    "updates": {
+      "url": "https://u.expo.dev/e451361c-3579-4421-9717-719cd8df936b"
     }
   }
 }
