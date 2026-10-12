@@ -16,6 +16,15 @@ export const API_URL = (process.env.EXPO_PUBLIC_API_URL ?? defaultApiUrl()).repl
 export const WS_URL = API_URL.replace(/^http/, 'ws') + '/ws';
 
 /**
+ * The web app (app.<host> next to api.<host>). Links that must open in a browser, such as the
+ * password reset link in the email, point here. Set EXPO_PUBLIC_WEB_URL to override.
+ */
+export const WEB_APP_URL = (process.env.EXPO_PUBLIC_WEB_URL ?? API_URL.replace('//api.', '//app.')).replace(
+  /\/$/,
+  '',
+);
+
+/**
  * The product manual, served by the web app at /guide/. Defaults to the app host that sits
  * next to the API (api.<host> becomes app.<host>); set EXPO_PUBLIC_GUIDE_URL to override.
  */

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Platform, View } from 'react-native';
 import { auth } from '../../data/session';
-import { API_URL } from '../../lib/config';
+import { WEB_APP_URL } from '../../lib/config';
 import { humanError } from '../../lib/errors';
 import { useTheme } from '../../theme/theme';
 import { Button } from '../../ui/Button';
@@ -27,10 +27,10 @@ export default function Forgot() {
     setError(null);
     try {
       // Better Auth emails a link that lands on the app's reset screen with ?token=.
+      // The server only accepts links to its own web app, so phones (including Expo Go, whose
+      // location is the dev server) always use the web app; the web build uses its own address.
       const redirectTo =
-        typeof window !== 'undefined' && window.location
-          ? `${window.location.origin}/reset-password`
-          : `${API_URL}/reset-password`;
+        Platform.OS === 'web' ? `${window.location.origin}/reset-password` : `${WEB_APP_URL}/reset-password`;
       await auth.requestPasswordReset(email.trim().toLowerCase(), redirectTo);
       setSent(true);
     } catch (err) {
