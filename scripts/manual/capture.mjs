@@ -5,7 +5,8 @@
  *
  *   node scripts/manual/capture.mjs [--base https://app.<host>] [--api https://api.<host>] [--only farmer-home,qa-task]
  *
- * Needs the demo seed (tester stack). One headless Chrome for the whole run.
+ * Needs the demo seed (tester stack). One headless Chrome for the whole run. On a slow link set
+ * CAPTURE_WAIT (ms per screen) higher than the 5500 default.
  */
 import { spawn } from 'node:child_process';
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
@@ -241,7 +242,8 @@ try {
     if (ONLY && !ONLY.has(name)) continue;
     await send('Page.navigate', { url: `${BASE}/favicon.ico` });
     await sleep(500);
-    const store = { 'farmgo.language': 'en' };
+    // The guide shows the light theme throughout, whatever the machine's own setting.
+    const store = { 'farmgo.language': 'en', 'farmgo.scheme': 'light' };
     if (role) store['farmgo.session'] = T[role];
     if (opts.cart) store['farmgo.cart'] = opts.cart;
     await send('Runtime.evaluate', {
@@ -250,7 +252,7 @@ try {
         .join(' ')}`,
     });
     await send('Page.navigate', { url: BASE + path });
-    await sleep(opts.wait ?? 5500);
+    await sleep(opts.wait ?? Number(process.env.CAPTURE_WAIT ?? 5500));
     const shot = await send('Page.captureScreenshot', { format: 'webp', quality: 86 });
     writeFileSync(join(OUT, `${name}.webp`), Buffer.from(shot.result.data, 'base64'));
     done++;

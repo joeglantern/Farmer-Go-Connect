@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>FarmGo Connect</title>
+    <meta name="description" content="Fresh produce from Kenyan farms to hotels, restaurants and homes. Quality checked, delivered and paid by M-Pesa." />
+    <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
+    <style id="expo-reset">
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        overflow: hidden;
+        margin: 0;
+        background: #f4f7f3;
+      }
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: #000000;
+        }
+      }
+      /* Shown while the app downloads; React replaces it on first render. */
+      .boot {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        font-family: Figtree, system-ui, -apple-system, "Segoe UI", sans-serif;
+        color: #0e3b22;
+      }
+      @media (prefers-color-scheme: dark) {
+        .boot {
+          color: #f5f5f7;
+        }
+      }
+      .boot svg {
+        width: 72px;
+        height: 72px;
+        animation: boot-breathe 1.8s ease-in-out infinite;
+      }
+      .boot b {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+      }
+      .boot b span {
+        color: #3e9b4f;
+      }
+      .boot .bar {
+        width: 120px;
+        height: 3px;
+        border-radius: 3px;
+        background: rgba(62, 155, 79, 0.18);
+        overflow: hidden;
+      }
+      .boot .bar i {
+        display: block;
+        width: 40%;
+        height: 100%;
+        border-radius: 3px;
+        background: #3e9b4f;
+        animation: boot-slide 1.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+      }
+      @keyframes boot-breathe {
+        50% {
+          transform: scale(1.06);
+        }
+      }
+      @keyframes boot-slide {
+        from {
+          transform: translateX(-100%);
+        }
+        to {
+          transform: translateX(250%);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .boot svg,
+        .boot .bar i {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript>You need to enable JavaScript to run FarmGo Connect.</noscript>
+    <div id="root">
+      <div class="boot" role="status" aria-label="Loading FarmGo Connect">
+        <svg viewBox="0 0 100 100" aria-hidden="true">
+          <path d="M47 86C20 80 5 52 10 18c30 4 48 32 37 68Z" fill="#3E9B4F" />
+          <path d="M47 86C40 60 27 38 10 18c30 4 48 32 37 68Z" fill="#257A42" />
+          <path d="M51 88c-1-36 15-66 43-78 6 34-10 66-43 78Z" fill="#B9CF4B" />
+          <path d="M51 88c11-28 25-54 43-78 6 34-10 66-43 78Z" fill="#A5C23F" />
+          <path d="M49 96c-1-6-2-12-5-20" stroke="#155230" stroke-width="4" stroke-linecap="round" fill="none" />
+        </svg>
+        <b>FarmGo <span>Connect</span></b>
+        <div class="bar"><i></i></div>
+      </div>
+    </div>
+  </body>
+</html>
