@@ -1,8 +1,14 @@
 import type { CreateListingInput, UpdateListingInput } from '@farmgo/contracts';
 import { AppError, Errors, emit, transitionOrder } from '@farmgo/core';
-import { type Farm, type FarmerProfile, num, type PrismaClient } from '@farmgo/db';
+import { type Farm, type FarmerProfile, type ListingStatus, num, type PrismaClient } from '@farmgo/db';
 
 type FarmWithFarmer = Farm & { farmer: FarmerProfile };
+
+/**
+ * Listings buyers never see: drafts, listings waiting for their QA check and listings QA did not
+ * approve. Only the farmer, their agent, admins (and QA officers) see them by id.
+ */
+export const HIDDEN_LISTING_STATUSES: readonly ListingStatus[] = ['DRAFT', 'PENDING_QA', 'QA_REJECTED'];
 
 export async function createListing(prisma: PrismaClient, farm: FarmWithFarmer, input: CreateListingInput) {
   if (!farm.active) throw Errors.badRequest('FARM_INACTIVE', 'This farm is marked inactive');
@@ -27,20 +33,16 @@ export async function createListing(prisma: PrismaClient, farm: FarmWithFarmer, 
         availableTo: input.availableTo,
         photos: input.photos,
         notes: input.notes,
-        status: input.status,
+        // A new listing goes live only after a QA officer has checked it at the farm.
+        status: input.status === 'OPEN' ? 'PENDING_QA' : input.status,
       },
       include: { produce: true },
     });
-    if (listing.status === 'OPEN') {
+    if (listing.status === 'PENDING_QA') {
       await emit(
         tx,
-        'supply.created',
-        {
-          listingId: listing.id,
-          farmerUserId: farm.farmer.userId,
-          produceId: produce.id,
-          county: farm.county,
-        },
+        'supply.qa_requested',
+        { listingId: listing.id, farmerUserId: farm.farmer.userId, county: farm.county },
         listing.id,
       );
     }
@@ -112,15 +114,36 @@ export async function updateListing(
       left = input.quantity - committed;
       data.quantityLeft = left;
     }
-    // Keep status consistent with what is left (unless the farmer is cancelling or drafting).
-    if (input.status !== 'CANCELLED' && input.status !== 'DRAFT' && listing.status !== 'DRAFT') {
+    let qaRequested = false;
+    if (!listing.qaApprovedAt) {
+      // Not approved yet: it can never go live from here. Publishing, resubmitting after a
+      // rejection or reopening sends it (back) to QA; pausing and cancelling stay allowed.
+      const wantsLive =
+        input.status === 'OPEN' || (input.status === undefined && (reactivating || reopening));
+      if (wantsLive) {
+        data.status = 'PENDING_QA';
+        qaRequested = listing.status !== 'PENDING_QA' || reactivating;
+        if (listing.status === 'QA_REJECTED') data.qaNote = null;
+      } else if (input.status === undefined) {
+        delete data.status; // edits keep PENDING_QA, QA_REJECTED or DRAFT as they are
+      }
+    } else if (input.status !== 'CANCELLED' && input.status !== 'DRAFT' && listing.status !== 'DRAFT') {
+      // Keep status consistent with what is left (unless the farmer is cancelling or drafting).
       data.status = left <= 0 ? 'FULLY_MATCHED' : committed > 0 ? 'PARTIALLY_MATCHED' : 'OPEN';
     }
     const updated = await tx.supplyListing.update({
       where: { id: listingId },
       data,
-      include: { produce: true },
+      include: { produce: true, farm: { select: { county: true } } },
     });
+    if (qaRequested) {
+      await emit(
+        tx,
+        'supply.qa_requested',
+        { listingId, farmerUserId, county: updated.farm.county },
+        listingId,
+      );
+    }
     if (input.status === 'CANCELLED') {
       // Withdraw open proposals; confirmed orders are unaffected.
       await tx.match.updateMany({ where: { listingId, status: 'PROPOSED' }, data: { status: 'REJECTED' } });
@@ -141,6 +164,17 @@ export async function markHarvestReady(
   actor: 'farmer' | 'admin',
 ) {
   return prisma.$transaction(async (tx) => {
+    const current = await tx.supplyListing.findUnique({
+      where: { id: listingId },
+      select: { qaApprovedAt: true },
+    });
+    if (!current) throw Errors.notFound('Listing');
+    if (!current.qaApprovedAt) {
+      throw Errors.conflict(
+        'LISTING_NOT_APPROVED',
+        'This listing has not passed its QA check yet, so it cannot be marked harvest ready',
+      );
+    }
     const listing = await tx.supplyListing.update({ where: { id: listingId }, data: { harvestReady: true } });
     const farm = await tx.farm.findUniqueOrThrow({
       where: { id: listing.farmId },

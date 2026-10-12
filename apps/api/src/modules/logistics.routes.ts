@@ -1,7 +1,9 @@
+import { isTest } from '@farmgo/config';
 import {
   AssignDriverInput,
   BuildRoutesInput,
   CompleteStopInput,
+  DeliveryCodeSentDto,
   FailStopInput,
   IdParams,
   LocationAcceptedDto,
@@ -21,7 +23,9 @@ import {
   completeStop,
   Errors,
   failStop,
+  sendDeliveryCode,
   startRoute,
+  verifyDeliveryCode,
 } from '@farmgo/core';
 import type { Prisma } from '@farmgo/db';
 import type { FastifyInstance } from 'fastify';
@@ -54,6 +58,9 @@ const routeInclude = {
     },
   },
 };
+
+/** Where the test suite finds the last delivery code sent for a stop (test runs only). */
+export const DELIVERY_CODE_TEST_KEY = (stopId: string) => `test:delivery-code:${stopId}`;
 
 type RouteWithStops = Prisma.RouteGetPayload<{ include: typeof routeInclude }>;
 
@@ -242,6 +249,36 @@ export default async function logisticsRoutes(app: FastifyInstance) {
   );
 
   r.post(
+    '/v1/stops/:id/delivery-code',
+    {
+      schema: {
+        tags: ['logistics'],
+        summary: 'Text the buyer a 4-digit code to confirm a drop-off instead of signing',
+        description:
+          'Drop-offs on a started route only. A new code replaces the last one and resets the wrong ' +
+          'tries; one code per stop every 30 seconds (429 DELIVERY_CODE_TOO_SOON).',
+        params: IdParams,
+        response: ok(DeliveryCodeSentDto),
+      },
+    },
+    async (req) => {
+      const user = requirePermission(req, { route: ['drive'] });
+      return sendDeliveryCode(
+        app.prisma,
+        req.params.id,
+        user.id,
+        isAdmin(user),
+        // The test suite reads the code here, the way it reads sign-in codes.
+        isTest
+          ? async (code) => {
+              await app.redis.set(DELIVERY_CODE_TEST_KEY(req.params.id), code, 'EX', 300);
+            }
+          : undefined,
+      );
+    },
+  );
+
+  r.post(
     '/v1/stops/:id/complete',
     {
       schema: {
@@ -256,8 +293,17 @@ export default async function logisticsRoutes(app: FastifyInstance) {
       const user = requirePermission(req, { route: ['drive'] });
       const keys = [req.body.podPhotoKey, req.body.signatureKey].filter((k): k is string => !!k);
       if (keys.length) await assertOwnKeys(req, keys);
+      // Checked before (and outside) the completion so a wrong try is counted.
+      const { deliveryCode } = req.body;
+      const done = await app.prisma.delivery.findUnique({
+        where: { id: req.params.id },
+        select: { status: true },
+      });
+      const codeConfirmed = !!deliveryCode && done?.status !== 'COMPLETED';
+      if (codeConfirmed)
+        await verifyDeliveryCode(app.prisma, req.params.id, deliveryCode, user.id, isAdmin(user));
       return app.prisma.$transaction(
-        (tx) => completeStop(tx, req.params.id, req.body, user.id, isAdmin(user)),
+        (tx) => completeStop(tx, req.params.id, req.body, user.id, isAdmin(user), { codeConfirmed }),
         { timeout: 20_000 },
       );
     },

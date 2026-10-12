@@ -31,7 +31,11 @@ export type TemplateKey =
   | 'input_order_new'
   | 'input_order_status'
   | 'crate_return_reminder'
-  | 'harvest_reminder';
+  | 'harvest_reminder'
+  | 'listing_qa_requested'
+  | 'listing_qa_passed'
+  | 'listing_qa_rejected'
+  | 'delivery_code';
 
 interface Copy {
   title: string;
@@ -242,6 +246,46 @@ const T: Record<TemplateKey, Record<Language, Copy>> = {
     sw: {
       title: 'Wakati wa kuvuna',
       body: 'Oda {{code}} inahitajika {{date}}. Iweke tayari kwenye programu au piga {{ussd}} ukishavuna.',
+    },
+  },
+  delivery_code: {
+    en: {
+      title: 'Delivery code',
+      body: 'FarmGo: your delivery code for order {{code}} is {{pin}}. Give it to the driver only when you have your produce.',
+    },
+    sw: {
+      title: 'Nambari ya kupokea',
+      body: 'FarmGo: nambari ya kupokea oda {{code}} ni {{pin}}. Mpe dereva tu ukishapokea mazao yako.',
+    },
+  },
+  listing_qa_requested: {
+    en: {
+      title: 'New listing to check',
+      body: 'A new {{produce}} listing from {{farm}} in {{county}} is waiting for its quality check.',
+    },
+    sw: {
+      title: 'Mazao mapya ya kukagua',
+      body: 'Mazao mapya ya {{produce}} kutoka {{farm}}, {{county}} yanasubiri ukaguzi wa ubora.',
+    },
+  },
+  listing_qa_passed: {
+    en: {
+      title: 'Listing approved',
+      body: 'Your {{produce}} listing is approved and buyers can now see it.',
+    },
+    sw: {
+      title: 'Mazao yameidhinishwa',
+      body: 'Mazao yako ya {{produce}} yameidhinishwa na wanunuzi sasa wanaweza kuyaona.',
+    },
+  },
+  listing_qa_rejected: {
+    en: {
+      title: 'Listing not approved',
+      body: 'Your {{produce}} listing was not approved. Open it to see why and send it again.',
+    },
+    sw: {
+      title: 'Mazao hayajaidhinishwa',
+      body: 'Mazao yako ya {{produce}} hayajaidhinishwa. Yafungue uone sababu kisha uyatume tena.',
     },
   },
 };

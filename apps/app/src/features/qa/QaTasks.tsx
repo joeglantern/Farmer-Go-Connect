@@ -1,4 +1,4 @@
-import type { QaTaskDto } from '@farmgo/contracts';
+import type { QaListingTaskDto, QaTaskDto } from '@farmgo/contracts';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -14,9 +14,9 @@ import { Header, Screen } from '../../ui/Screen';
 import { SkeletonList } from '../../ui/Skeleton';
 import { EmptyState, ErrorState } from '../../ui/States';
 import { Text } from '../../ui/Text';
-import { callPhone, openDirections, useQaDashboard, useQaTasks } from './data';
+import { callPhone, openDirections, useQaDashboard, useQaListings, useQaTasks } from './data';
 
-/** QA officer home: orders waiting for a quality check in every county, soonest first. */
+/** QA officer home: new listings to approve, then orders waiting for a quality check, soonest first. */
 export function QaTasks() {
   const { t: tr } = useTranslation();
   const size = useSizeClass();
@@ -26,6 +26,11 @@ export function QaTasks() {
   const waiting = byCounty.reduce((s, c) => s + c.tasks, 0);
   // One call for every county; the chips filter it here.
   const tasks = useQaTasks('all');
+  const listings = useQaListings();
+  const toCheck = useMemo(
+    () => (listings.data ?? []).filter((l) => scope === 'all' || l.farm.county === scope),
+    [listings.data, scope],
+  );
   const list = useMemo(
     () =>
       (tasks.data ?? [])
@@ -40,21 +45,22 @@ export function QaTasks() {
   const refresh = () => {
     void dash.refetch();
     void tasks.refetch();
+    void listings.refetch();
   };
 
   return (
     <Screen
       header={<Header title={tr('qa.tasksTitle')} subtitle={tr('qa.tasksSubtitle')} back={false} large />}
-      refreshing={dash.isRefetching || tasks.isRefetching}
+      refreshing={dash.isRefetching || tasks.isRefetching || listings.isRefetching}
       onRefresh={refresh}
     >
       <View style={{ gap: 16 }}>
         <View style={styles.row}>
           <Stat
             label={tr('qa.waiting')}
-            value={dash.data ? String(waiting) : null}
+            value={dash.data ? String(waiting + (listings.data?.length ?? 0)) : null}
             icon="basket"
-            warn={waiting > 0}
+            warn={waiting + (listings.data?.length ?? 0) > 0}
           />
           <Stat
             label={tr('qa.inspectedToday')}
@@ -91,6 +97,32 @@ export function QaTasks() {
               />
             ))}
           </ScrollView>
+        )}
+
+        {toCheck.length > 0 && (
+          <View style={{ gap: 12 }}>
+            <View style={{ gap: 2 }}>
+              <Text variant="title3" accessibilityRole="header">
+                {tr('qa.listingsTitle')}
+              </Text>
+              <Text variant="callout" tone="secondary">
+                {tr('qa.listingsBody')}
+              </Text>
+            </View>
+            <View style={styles.grid}>
+              {toCheck.map((l) => (
+                <View
+                  key={l.id}
+                  style={{ width: columns === 1 ? '100%' : columns === 2 ? '48.8%' : '32.2%' }}
+                >
+                  <ListingTaskCard listing={l} showCounty={scope === 'all'} />
+                </View>
+              ))}
+            </View>
+            <Text variant="title3" accessibilityRole="header" style={{ marginTop: 8 }}>
+              {tr('qa.ordersTitle')}
+            </Text>
+          </View>
         )}
 
         {loading ? (
@@ -146,7 +178,7 @@ export function Stat({
         </Text>
       </View>
       <Text
-        variant="display"
+        variant="title1"
         numeric
         numberOfLines={1}
         adjustsFontSizeToFit
@@ -154,6 +186,71 @@ export function Stat({
       >
         {value ?? ' '}
       </Text>
+    </Card>
+  );
+}
+
+function ListingTaskCard({ listing, showCounty }: { listing: QaListingTaskDto; showCounty: boolean }) {
+  const t = useTheme();
+  const { t: tr } = useTranslation();
+  const farm = listing.farm;
+  const farmer = farm.farmer.user;
+  const amount = Number(listing.quantity);
+  const open = () => router.push({ pathname: '/qa/listing/[id]', params: { id: listing.id } });
+  return (
+    <Card style={{ gap: 14 }}>
+      <Pressable
+        onPress={open}
+        accessibilityLabel={`${produceName(listing.produce)}, ${farm.name}`}
+        focusRadius={t.radius.sm}
+        style={{ gap: 12 }}
+      >
+        <View style={styles.head}>
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text variant="headline" numberOfLines={1}>
+              {farm.name}
+            </Text>
+            <View style={styles.meta}>
+              <Icon name="location" size={14} color={t.colors.primary} weight="fill" />
+              <Text variant="caption" tone="secondary" numberOfLines={1}>
+                {[farm.ward, showCounty || !farm.ward ? farm.county : null].filter(Boolean).join(', ')}
+              </Text>
+            </View>
+          </View>
+          <Pill label={tr('qa.listedOn', { date: dateShort(listing.createdAt) })} tone="info" size="sm" />
+        </View>
+        <View style={styles.item}>
+          <ProduceImage
+            uri={listing.photoUrls[0] ?? listing.produce.imageUrl}
+            category={listing.produce.category}
+            produce={listing.produce}
+            size={40}
+            radius={10}
+          />
+          <Text variant="bodyStrong" style={{ flex: 1 }} numberOfLines={1}>
+            {produceName(listing.produce)}
+          </Text>
+          <Text variant="bodyStrong" numeric>
+            {qty(amount)} {unitLabel(listing.produce.unit, amount)}
+          </Text>
+        </View>
+      </Pressable>
+      <View style={styles.actions}>
+        <IconButton
+          icon="phone"
+          label={tr('qa.callFarmer', { name: farmer.name })}
+          variant="tinted"
+          onPress={() => callPhone(farmer.phoneNumber)}
+          disabled={!farmer.phoneNumber}
+        />
+        <IconButton
+          icon="navigate"
+          label={tr('qa.directions')}
+          variant="tinted"
+          onPress={() => openDirections(farm.lat, farm.lng, farm.name)}
+        />
+        <Button label={tr('qa.checkListing')} size="md" icon="shield" style={{ flex: 1 }} onPress={open} />
+      </View>
     </Card>
   );
 }

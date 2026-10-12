@@ -11,6 +11,7 @@ import {
   makeApp,
   nextPhone,
   phoneUser,
+  postListing,
   produceId,
   type Session,
 } from './helpers.js';
@@ -152,7 +153,7 @@ describe('response DTOs', () => {
         farm: { name: 'DTO Farm', county: 'Kiambu', lat: -1.17, lng: 36.83 },
       });
       farmId = (await call(app, farmer, 'GET', '/v1/farms')).body[0].id;
-      const listing = await call(app, farmer, 'POST', '/v1/supply', {
+      const listing = await postListing(app, farmer, {
         farmId,
         produceId: await produceId(app, 'kale'),
         quantity: 100,

@@ -12,6 +12,7 @@ import {
   makeApp,
   nextPhone,
   phoneUser,
+  postListing,
   produceId,
   type Session,
 } from './helpers.js';
@@ -99,7 +100,7 @@ describe('other channels and features', () => {
       });
       const farm = (await call(app, farmer, 'GET', '/v1/farms')).body[0];
       const listing = (
-        await call(app, farmer, 'POST', '/v1/supply', {
+        await postListing(app, farmer, {
           farmId: farm.id,
           produceId: await produceId(app, 'onions-red'),
           quantity: 100,
@@ -208,7 +209,7 @@ describe('other channels and features', () => {
       expect(dup.status).toBe(409);
       const mine = await call(app, agent, 'GET', '/v1/agent/farmers');
       const fp = mine.body.items.find((f: { user: { phoneNumber: string } }) => f.user.phoneNumber === phone);
-      const listing = await call(app, agent, 'POST', '/v1/supply', {
+      const listing = await postListing(app, agent, {
         farmId: fp.farms[0].id,
         produceId: await produceId(app, 'cabbage'),
         quantity: 200,
@@ -218,7 +219,7 @@ describe('other channels and features', () => {
       });
       expect(listing.status).toBe(201);
       const otherAgent = await emailUser(app, 'agent');
-      const denied = await call(app, otherAgent, 'POST', '/v1/supply', {
+      const denied = await postListing(app, otherAgent, {
         farmId: fp.farms[0].id,
         produceId: await produceId(app, 'cabbage'),
         quantity: 1,

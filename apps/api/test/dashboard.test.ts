@@ -10,6 +10,7 @@ import {
   makeApp,
   nextPhone,
   phoneUser,
+  postListing,
   produceId,
   type Session,
 } from './helpers.js';
@@ -40,7 +41,7 @@ describe('role dashboards', () => {
     });
     farmId = (await call(app, farmer, 'GET', '/v1/farms')).body[0].id;
     listingId = (
-      await call(app, farmer, 'POST', '/v1/supply', {
+      await postListing(app, farmer, {
         farmId,
         produceId: await produceId(app, 'garlic'),
         quantity: 500,
@@ -149,7 +150,7 @@ describe('role dashboards', () => {
     const agentFarm = await app.prisma.farm.findFirstOrThrow({
       where: { farmerId: created.body.profile.id },
     });
-    await call(app, agent, 'POST', '/v1/supply', {
+    await postListing(app, agent, {
       farmId: agentFarm.id,
       produceId: await produceId(app, 'kale'),
       quantity: 50,

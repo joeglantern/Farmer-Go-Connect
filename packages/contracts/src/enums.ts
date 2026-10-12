@@ -31,6 +31,10 @@ export const ProduceCategory = z.enum([
 export const Unit = z.enum(['KG', 'CRATE', 'BUNCH', 'PIECE', 'LITRE', 'TRAY', 'BAG']);
 export const ListingStatus = z.enum([
   'DRAFT',
+  /** Waiting for a QA officer to check the produce at the farm; buyers cannot see it yet. */
+  'PENDING_QA',
+  /** The QA officer did not approve it; the farmer can fix it and send it again. */
+  'QA_REJECTED',
   'OPEN',
   'PARTIALLY_MATCHED',
   'FULLY_MATCHED',

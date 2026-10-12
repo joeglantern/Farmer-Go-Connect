@@ -45,13 +45,13 @@ export function Button({
   const c = t.colors;
   const palette: Record<ButtonVariant, { bg: string; bgPressed: string; fg: string; border?: string }> = {
     primary: { bg: c.primary, bgPressed: c.primaryPressed, fg: c.textOnBrand },
-    secondary: { bg: c.primaryTint, bgPressed: c.primaryTintStrong, fg: c.primary },
-    outline: { bg: 'transparent', bgPressed: c.primaryTint, fg: c.primary, border: c.primary },
-    ghost: { bg: 'transparent', bgPressed: c.surfaceMuted, fg: c.primary },
+    secondary: { bg: c.primaryTint, bgPressed: c.primaryTintStrong, fg: c.primaryContent },
+    outline: { bg: 'transparent', bgPressed: c.primaryTint, fg: c.primaryContent, border: c.primary },
+    ghost: { bg: 'transparent', bgPressed: c.surfaceMuted, fg: c.primaryContent },
     danger: { bg: c.danger, bgPressed: c.dangerPressed, fg: '#FFFFFF' },
     onBrand: { bg: '#FFFFFF', bgPressed: c.primaryTint, fg: c.band },
     /** Outlined, on an opaque surface so it reads over a photograph. */
-    onPhoto: { bg: c.surface, bgPressed: c.primaryTint, fg: c.primary, border: c.primary },
+    onPhoto: { bg: c.surface, bgPressed: c.primaryTint, fg: c.primaryContent, border: c.primary },
   };
   const p = palette[variant];
   const inactive = disabled || loading;

@@ -9,6 +9,7 @@ import {
   makeApp,
   nextPhone,
   phoneUser,
+  postListing,
   produceId,
   type Session,
 } from './helpers.js';
@@ -42,7 +43,7 @@ describe('staff and lifecycle endpoints', () => {
     });
     farmId = (await call(app, farmer, 'GET', '/v1/farms')).body[0].id;
     listingId = (
-      await call(app, farmer, 'POST', '/v1/supply', {
+      await postListing(app, farmer, {
         farmId,
         produceId: await produceId(app, 'watermelon'),
         quantity: 100,
@@ -195,7 +196,7 @@ describe('staff and lifecycle endpoints', () => {
     expect(busy.body.error.code).toBe('FARM_IN_USE');
 
     const second = (
-      await call(app, farmer, 'POST', '/v1/supply', {
+      await postListing(app, farmer, {
         farmId,
         produceId: await produceId(app, 'kale'),
         quantity: 10,

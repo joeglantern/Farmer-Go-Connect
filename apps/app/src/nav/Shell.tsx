@@ -74,7 +74,7 @@ export function TabBar({ badges }: { badges?: Partial<Record<string, number>> })
               </Pressable>
               <Text
                 variant="micro"
-                style={{ color: active ? t.colors.primary : t.colors.textTertiary, marginTop: 2 }}
+                style={{ color: active ? t.colors.primaryContent : t.colors.textTertiary, marginTop: 2 }}
               >
                 {tr(item.labelKey)}
               </Text>
@@ -97,7 +97,7 @@ export function TabBar({ badges }: { badges?: Partial<Record<string, number>> })
               <Icon
                 name={item.icon}
                 size={24}
-                color={active ? t.colors.primary : t.colors.textTertiary}
+                color={active ? t.colors.primaryContent : t.colors.textTertiary}
                 weight={active ? 'fill' : 'regular'}
               />
               {!!badge && (
@@ -110,7 +110,7 @@ export function TabBar({ badges }: { badges?: Partial<Record<string, number>> })
                 </View>
               )}
             </View>
-            <Text variant="micro" style={{ color: active ? t.colors.primary : t.colors.textTertiary }}>
+            <Text variant="micro" style={{ color: active ? t.colors.primaryContent : t.colors.textTertiary }}>
               {tr(item.labelKey)}
             </Text>
           </Pressable>
@@ -187,7 +187,9 @@ export function Rail({ badges }: { badges?: Partial<Record<string, number>> }) {
                     <Icon
                       name={item.icon}
                       size={22}
-                      color={item.primary ? '#FFFFFF' : active ? t.colors.primary : t.colors.textSecondary}
+                      color={
+                        item.primary ? '#FFFFFF' : active ? t.colors.primaryContent : t.colors.textSecondary
+                      }
                       weight={active || item.primary ? 'fill' : 'regular'}
                     />
                     {!!badge && <View style={[styles.railDot, { backgroundColor: t.colors.danger }]} />}
@@ -195,7 +197,10 @@ export function Rail({ badges }: { badges?: Partial<Record<string, number>> }) {
                   <Text
                     variant="micro"
                     numberOfLines={1}
-                    style={{ color: active ? t.colors.primary : t.colors.textSecondary, textAlign: 'center' }}
+                    style={{
+                      color: active ? t.colors.primaryContent : t.colors.textSecondary,
+                      textAlign: 'center',
+                    }}
                   >
                     {tr(item.labelKey)}
                   </Text>
@@ -320,12 +325,12 @@ export function Sidebar({ badges }: { badges?: Partial<Record<string, number>> }
                     <Icon
                       name={item.icon}
                       size={20}
-                      color={active ? t.colors.primary : t.colors.textSecondary}
+                      color={active ? t.colors.primaryContent : t.colors.textSecondary}
                       weight={active ? 'fill' : 'regular'}
                     />
                     <Text
                       variant="calloutStrong"
-                      style={{ flex: 1, color: active ? t.colors.primary : t.colors.text }}
+                      style={{ flex: 1, color: active ? t.colors.primaryContent : t.colors.text }}
                     >
                       {tr(item.labelKey)}
                     </Text>

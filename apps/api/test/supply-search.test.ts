@@ -8,6 +8,7 @@ import {
   makeApp,
   nextPhone,
   phoneUser,
+  postListing,
   produceId,
   type Session,
 } from './helpers.js';
@@ -36,7 +37,7 @@ describe('supply search', () => {
     price: number,
     fromDays: number,
   ) {
-    const r = await call(app, owner.f, 'POST', '/v1/supply', {
+    const r = await postListing(app, owner.f, {
       farmId: owner.farmId,
       produceId: await produceId(app, slug),
       quantity: 100,

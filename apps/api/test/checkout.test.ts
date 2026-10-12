@@ -10,6 +10,7 @@ import {
   makeApp,
   nextPhone,
   phoneUser,
+  postListing,
   produceId,
   type Session,
 } from './helpers.js';
@@ -66,7 +67,7 @@ describe('cart and checkout', () => {
         farm: { name: `${name} Farm`, county: 'Kiambu', lat: -1.1, lng: 36.8 },
       });
       const farmId = (await call(app, f, 'GET', '/v1/farms')).body[0].id;
-      const l = await call(app, f, 'POST', '/v1/supply', {
+      const l = await postListing(app, f, {
         farmId,
         produceId: await produceId(app, slug),
         quantity: 500,
@@ -255,7 +256,7 @@ describe('cart and checkout', () => {
     // Two buyers race for the last 30 kg: exactly one checkout wins, the other gets 409.
     const farm = (await call(app, farmers[1]!, 'GET', '/v1/farms')).body[0];
     const small = (
-      await call(app, farmers[1]!, 'POST', '/v1/supply', {
+      await postListing(app, farmers[1]!, {
         farmId: farm.id,
         produceId: await produceId(app, 'spinach'),
         quantity: 30,

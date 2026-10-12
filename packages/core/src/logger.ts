@@ -46,6 +46,7 @@ export const loggerOptions: pino.LoggerOptions = {
       'headers.cookie',
       '*.password',
       '*.code',
+      '*.deliveryCode',
       '*.otp',
       '*.token',
       '*.SecurityCredential',

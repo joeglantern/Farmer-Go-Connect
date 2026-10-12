@@ -365,6 +365,10 @@ model Produce {
 
 enum ListingStatus {
   DRAFT
+  /// Waiting for a QA officer to check the produce at the farm; buyers cannot see it yet.
+  PENDING_QA
+  /// The QA officer did not approve it; the farmer can fix it and send it again.
+  QA_REJECTED
   OPEN
   PARTIALLY_MATCHED
   FULLY_MATCHED
@@ -388,6 +392,13 @@ model SupplyListing {
   status        ListingStatus @default(OPEN)
   photos        String[]      @default([])
   notes         String?
+  /// When a QA officer approved the listing; null until then (it cannot go live without it).
+  qaApprovedAt  DateTime?
+  /// The officer (user id) who made the last check.
+  qaCheckedById String?
+  /// The officer's note on the last check (the reason, when not approved).
+  qaNote        String?
+  qaPhotos      String[]      @default([])
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
@@ -793,6 +804,11 @@ model Delivery {
   podPhotoKey     String?
   signatureKey    String?
   recipientName   String?
+  /// Proof of delivery by SMS code: a peppered hash of the code sent to the buyer.
+  deliveryCodeHash     String?
+  deliveryCodeSentAt   DateTime?
+  deliveryCodeAttempts Int       @default(0)
+  codeConfirmedAt      DateTime?
   failureReason   String?
   cratesDropped   Int        @default(0)
   cratesCollected Int        @default(0)

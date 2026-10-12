@@ -9,6 +9,7 @@ import {
   makeApp,
   nextPhone,
   phoneUser,
+  postListing,
   produceId,
   type Session,
 } from './helpers.js';
@@ -39,7 +40,7 @@ describe('pausing demand', () => {
       farm: { name: 'Nanyuki Farm', county: COUNTY, lat: 0.02, lng: 37.08 },
     });
     const farmId = (await call(app, farmer, 'GET', '/v1/farms')).body[0].id;
-    await call(app, farmer, 'POST', '/v1/supply', {
+    await postListing(app, farmer, {
       farmId,
       produceId: cabbage,
       quantity: 1000,

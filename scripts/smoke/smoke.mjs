@@ -59,7 +59,8 @@ async function step(name, fn) {
   try {
     const out = await fn();
     // Session tokens are strings too; never print them.
-    const detail = typeof out === 'string' && !name.includes('signs in') && !name.includes('opens the app') ? out : '';
+    const detail =
+      typeof out === 'string' && !name.includes('signs in') && !name.includes('opens the app') ? out : '';
     record(name, true, detail);
     return out ?? true;
   } catch (err) {
@@ -429,6 +430,60 @@ if (slot && farmer) {
         return row && row.refundedAmount >= before.refundedAmount + 100 ? row : null;
       });
       if (!after) throw new Error('refund did not reach the buyer');
+    });
+  }
+}
+
+// ─── 3b. New listings wait for a quality check before buyers see them ──────
+
+if (farmer && qa && buyer && listing) {
+  const fresh = await step('a new listing waits for its quality check', async () => {
+    const farms = await call('GET', '/v1/farms', { token: farmer, expect: 200 });
+    const farm = (Array.isArray(farms.json) ? farms.json : farms.json.items).find((f) => f.active);
+    if (!farm) throw new Error('the farmer has no active farm');
+    const from = new Date(Date.now() + 2 * 86_400_000).toISOString().slice(0, 10);
+    const to = new Date(Date.now() + 20 * 86_400_000).toISOString().slice(0, 10);
+    const r = await call('POST', '/v1/supply', {
+      token: farmer,
+      body: {
+        farmId: farm.id,
+        produceId: listing.produceId,
+        quantity: 25,
+        pricePerUnit: listing.pricePerUnit,
+        availableFrom: from,
+        availableTo: to,
+        photos: [],
+        notes: 'Smoke test listing',
+      },
+      expect: 201,
+    });
+    if (r.json.status !== 'PENDING_QA') throw new Error(`status ${r.json.status}`);
+    return r.json;
+  });
+  if (fresh) {
+    await step('buyers cannot see it until it is approved', async () => {
+      await call('GET', `/v1/supply/${fresh.id}`, { ...as(buyer), expect: 404 });
+    });
+    await step('the QA officer sees it and approves it with a grade', async () => {
+      const list = await call('GET', '/v1/qa/listings?county=all', { token: qa, expect: 200 });
+      if (!list.json.some((l) => l.id === fresh.id)) throw new Error('not in the QA list');
+      const grade = listing.produce?.grades?.[0];
+      const r = await call('POST', `/v1/qa/listings/${fresh.id}/check`, {
+        token: qa,
+        body: { passed: true, grade, note: 'Smoke test: looks good', photos: [] },
+        expect: 200,
+      });
+      if (r.json.status !== 'OPEN') throw new Error(`status ${r.json.status}`);
+    });
+    await step('buyers can see it once approved', async () => {
+      await call('GET', `/v1/supply/${fresh.id}`, { ...as(buyer), expect: 200 });
+    });
+    await step('the farmer closes the smoke listing', async () => {
+      await call('PATCH', `/v1/supply/${fresh.id}`, {
+        token: farmer,
+        body: { status: 'CANCELLED' },
+        expect: 200,
+      });
     });
   }
 }

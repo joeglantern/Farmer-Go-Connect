@@ -88,7 +88,10 @@ export async function anonymizeAccount(prisma: PrismaClient, userId: string) {
         data: { active: false, lat: null, lng: null, photoKey: null, ward: null, name: 'Closed farm' },
       });
       await tx.supplyListing.updateMany({
-        where: { farm: { farmerId: profile.id }, status: { in: ['OPEN', 'PARTIALLY_MATCHED', 'DRAFT'] } },
+        where: {
+          farm: { farmerId: profile.id },
+          status: { in: ['OPEN', 'PARTIALLY_MATCHED', 'DRAFT', 'PENDING_QA', 'QA_REJECTED'] },
+        },
         data: { status: 'CANCELLED' },
       });
     }

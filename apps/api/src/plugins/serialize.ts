@@ -19,9 +19,15 @@ const KEY_TO_URL: readonly [key: string, url: string][] = [
   ['signatureKey', 'signatureUrl'],
 ];
 
+/** Stored lists of object keys and the URL list the API adds next to each. */
+const KEYS_TO_URLS: readonly [keys: string, urls: string][] = [
+  ['photos', 'photoUrls'],
+  ['qaPhotos', 'qaPhotoUrls'],
+];
+
 /**
  * Add a ready-to-load URL beside every stored file reference so clients never assemble storage
- * URLs: `imageKey` gains `imageUrl`, `photos` gains `photoUrls`, a user's `image` gains `imageUrl`,
+ * URLs: `imageKey` gains `imageUrl`, `photos` gains `photoUrls` (`qaPhotos` gains `qaPhotoUrls`), a user's `image` gains `imageUrl`,
  * and so on. Missing files become null (or an empty list), never a placeholder.
  */
 function addFileUrls(out: Record<string, unknown>) {
@@ -31,10 +37,11 @@ function addFileUrls(out: Record<string, unknown>) {
   for (const [key, url] of KEY_TO_URL) {
     if (key in out && !(url in out) && isKey(out[key])) out[url] = fileUrl(out[key]);
   }
-  if (Array.isArray(out.photos) && !('photoUrls' in out) && out.photos.every((k) => typeof k === 'string')) {
-    out.photoUrls = (out.photos as unknown[])
-      .map((k) => (typeof k === 'string' ? fileUrl(k) : null))
-      .filter((u): u is string => u !== null);
+  for (const [key, url] of KEYS_TO_URLS) {
+    const keys = out[key];
+    if (Array.isArray(keys) && !(url in out) && keys.every((k) => typeof k === 'string')) {
+      out[url] = (keys as string[]).map((k) => fileUrl(k)).filter((u): u is string => u !== null);
+    }
   }
   // User avatar: Better Auth's `image` column holds our object key (or an external URL).
   if ('image' in out && !('imageUrl' in out) && (out.image === null || typeof out.image === 'string')) {

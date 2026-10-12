@@ -204,7 +204,7 @@ export async function expireStale(
     data: { status: 'EXPIRED' },
   });
   const listings = await prisma.supplyListing.updateMany({
-    where: { status: { in: ['OPEN', 'PARTIALLY_MATCHED'] }, availableTo: { lt: cutoff } },
+    where: { status: { in: ['OPEN', 'PARTIALLY_MATCHED', 'PENDING_QA'] }, availableTo: { lt: cutoff } },
     data: { status: 'EXPIRED' },
   });
   return { demand: demand.count + templates.count, listings: listings.count };

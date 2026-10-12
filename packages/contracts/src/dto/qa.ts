@@ -29,6 +29,12 @@ export type QaTaskDto = z.infer<typeof QaTaskDto>;
 export const QaTaskListDto = z.array(QaTaskDto);
 export type QaTaskListDto = z.infer<typeof QaTaskListDto>;
 
+/** GET /v1/qa/listings items: a new listing waiting for its check at the farm. */
+export const QaListingTaskDto = SupplyListingDto.extend({ produce: ProduceDto, farm: QaTaskFarmDto });
+export type QaListingTaskDto = z.infer<typeof QaListingTaskDto>;
+export const QaListingTaskListDto = z.array(QaListingTaskDto);
+export type QaListingTaskListDto = z.infer<typeof QaListingTaskListDto>;
+
 /** POST /v1/qa/inspections (201) */
 export const InspectionResultDto = z.object({
   inspection: InspectionDto,

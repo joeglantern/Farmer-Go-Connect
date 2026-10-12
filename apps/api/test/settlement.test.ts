@@ -9,6 +9,7 @@ import {
   makeApp,
   nextPhone,
   phoneUser,
+  postListing,
   produceId,
   type Session,
 } from './helpers.js';
@@ -61,7 +62,7 @@ describe('settlement: disputes, refunds, invoices and the dispute window', () =>
     });
     const farm = (await call(app, farmer, 'GET', '/v1/farms')).body[0];
     listingId = (
-      await call(app, farmer, 'POST', '/v1/supply', {
+      await postListing(app, farmer, {
         farmId: farm.id,
         produceId: await produceId(app, 'avocados'),
         quantity: 5000,
@@ -178,7 +179,7 @@ describe('settlement: disputes, refunds, invoices and the dispute window', () =>
       })
     ).body;
     const farmId = (await call(app, farmer, 'GET', '/v1/farms')).body[0].id;
-    await call(app, farmer, 'POST', '/v1/supply', {
+    await postListing(app, farmer, {
       farmId,
       produceId: crop.id,
       quantity: 500,

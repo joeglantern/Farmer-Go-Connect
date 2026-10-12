@@ -31,6 +31,12 @@ export function hrefForLink(link: DeepLink | null | undefined, role?: string | n
       return p.id ? { pathname: '/payment/[checkoutId]', params: { checkoutId: p.id } } : null;
     case 'invoice':
       return p.id ? { pathname: '/invoices/[id]', params: { id: p.id } } : '/invoices';
+    case 'listing':
+      // QA officers open the check screen; farmers and agents open their listing.
+      if (!p.id) return role === 'qa_officer' ? '/home' : '/listings';
+      return role === 'qa_officer'
+        ? { pathname: '/qa/listing/[id]', params: { id: p.id } }
+        : { pathname: '/listings/[id]', params: { id: p.id } };
     case 'crates':
       return '/scan';
     case 'profile':

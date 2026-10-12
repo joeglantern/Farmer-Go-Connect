@@ -13,6 +13,7 @@ import {
   makeApp,
   nextPhone,
   phoneUser,
+  postListing,
   produceId,
   type Session,
 } from './helpers.js';
@@ -118,7 +119,7 @@ describe('hardened routes', () => {
     await call(app, other, 'POST', '/v1/onboarding/farmer', { name: 'Other Farmer', county: 'Nakuru' });
     const farmId = (await call(app, farmer, 'GET', '/v1/farms')).body[0].id;
     listingId = (
-      await call(app, farmer, 'POST', '/v1/supply', {
+      await postListing(app, farmer, {
         farmId,
         produceId: await produceId(app, 'sweet-potatoes'),
         quantity: 100,

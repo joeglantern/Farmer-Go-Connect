@@ -8,6 +8,7 @@ import {
   makeApp,
   nextPhone,
   phoneUser,
+  postListing,
   produceId,
   type Session,
 } from './helpers.js';
@@ -29,7 +30,7 @@ async function onboardFarmerWithListing(app: FastifyInstance, s: Session, qty = 
     farm: { name: 'Kariuki Farm', county: 'Kiambu', lat: -1.05, lng: 36.9 },
   });
   const farm = (await call(app, s, 'GET', '/v1/farms')).body[0];
-  const listing = await call(app, s, 'POST', '/v1/supply', {
+  const listing = await postListing(app, s, {
     farmId: farm.id,
     produceId: await produceId(app, 'potatoes'),
     quantity: qty,
@@ -145,7 +146,7 @@ describe('access control and safety rules', () => {
   it('never oversells a listing under concurrent orders', async () => {
     const { listingId: small } = await (async () => {
       const farm = farmId;
-      const l = await call(app, farmer, 'POST', '/v1/supply', {
+      const l = await postListing(app, farmer, {
         farmId: farm,
         produceId: await produceId(app, 'carrots'),
         quantity: 100,

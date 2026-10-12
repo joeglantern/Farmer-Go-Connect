@@ -13,6 +13,7 @@ import type { Favorite, FavoriteKind, PrismaClient } from '@farmgo/db';
 import type { FastifyInstance } from 'fastify';
 import { requireUser } from '../lib/guards.js';
 import { ok, typed } from '../lib/route.js';
+import { HIDDEN_LISTING_STATUSES } from './supply.service.js';
 
 /** Give each favorite a title, image and availability, looking targets up in bulk. */
 export async function describeFavorites(prisma: PrismaClient, favs: Favorite[]) {
@@ -129,7 +130,9 @@ export default async function favoriteRoutes(app: FastifyInstance) {
       const { kind, targetId } = req.body;
       const exists =
         kind === 'LISTING'
-          ? await app.prisma.supplyListing.count({ where: { id: targetId, status: { not: 'DRAFT' } } })
+          ? await app.prisma.supplyListing.count({
+              where: { id: targetId, status: { notIn: [...HIDDEN_LISTING_STATUSES] } },
+            })
           : kind === 'FARMER'
             ? await app.prisma.farmerProfile.count({ where: { id: targetId } })
             : kind === 'PRODUCE'

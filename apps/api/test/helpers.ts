@@ -117,3 +117,40 @@ export const days = (n: number) => new Date(Date.now() + n * 86_400_000).toISOSt
 export async function produceId(app: FastifyInstance, slug: string) {
   return (await app.prisma.produce.findUniqueOrThrow({ where: { slug } })).id;
 }
+
+const qaOfficers = new WeakMap<FastifyInstance, Promise<Session>>();
+
+/** One QA officer per app instance, for approving listings in tests. */
+export function qaOfficer(app: FastifyInstance): Promise<Session> {
+  let s = qaOfficers.get(app);
+  if (!s) {
+    s = emailUser(app, 'qa_officer', 'Helper QA');
+    qaOfficers.set(app, s);
+  }
+  return s;
+}
+
+/** Approve a listing waiting for its QA check (the way an officer does at the farm). */
+export async function approveListing(app: FastifyInstance, listingId: string, grade?: string) {
+  const res = await call(app, await qaOfficer(app), 'POST', `/v1/qa/listings/${listingId}/check`, {
+    passed: true,
+    photos: [],
+    ...(grade ? { grade } : {}),
+  });
+  if (res.status !== 200) throw new Error(`approve failed: ${res.status} ${JSON.stringify(res.body)}`);
+  return res.body;
+}
+
+/**
+ * POST /v1/supply and, when the new listing waits for QA, approve it at once, so tests that are
+ * not about the QA check get a live listing as before. Returns what `call` returns (status 201)
+ * with the approved listing as the body.
+ */
+export async function postListing<T = any>(app: FastifyInstance, s: Session, payload: unknown) {
+  const res = await call<T>(app, s, 'POST', '/v1/supply', payload);
+  const body = res.body as { id?: string; status?: string };
+  if (res.status === 201 && body.status === 'PENDING_QA' && body.id) {
+    return { ...res, body: (await approveListing(app, body.id)) as T };
+  }
+  return res;
+}

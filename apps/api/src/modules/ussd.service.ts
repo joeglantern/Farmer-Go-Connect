@@ -50,8 +50,8 @@ const S = {
     en: '{{qty}} {{unit}} {{produce}} at KES {{price}} on {{date}}\n1. Confirm\n2. Cancel',
   },
   listed: {
-    sw: 'Mazao yameorodheshwa. Tutakutumia SMS mnunuzi akipatikana.',
-    en: 'Listed. We will SMS you when a buyer is found.',
+    sw: 'Mazao yameorodheshwa. Afisa wa FarmGo atayakagua kwanza, kisha tutakutumia SMS mnunuzi akipatikana.',
+    en: 'Listed. A FarmGo officer will check it first, then we SMS you when a buyer is found.',
   },
   noFarm: {
     sw: 'Huna shamba bado. Ongeza shamba kwenye programu au kupitia wakala.',

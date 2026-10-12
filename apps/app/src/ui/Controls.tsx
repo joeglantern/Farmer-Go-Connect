@@ -155,7 +155,7 @@ export function Pill({
   const t = useTheme();
   const map: Record<Tone, { bg: string; fg: string }> = {
     neutral: { bg: t.colors.surfaceMuted, fg: t.colors.textSecondary },
-    brand: { bg: t.colors.primaryTint, fg: t.colors.primary },
+    brand: { bg: t.colors.primaryTint, fg: t.colors.primaryContent },
     success: { bg: t.colors.successTint, fg: t.colors.success },
     warning: { bg: t.colors.warningTint, fg: t.colors.warning },
     danger: { bg: t.colors.dangerTint, fg: t.colors.danger },
@@ -203,7 +203,7 @@ export function Tag({
           accessibilityIgnoresInvertColors
         />
       ) : (
-        <Icon name={icon} size={18} color={t.colors.primary} weight="fill" />
+        <Icon name={icon} size={18} color={t.colors.primaryContent} weight="fill" />
       )}
       <Text variant="callout" tone="secondary">
         {label}

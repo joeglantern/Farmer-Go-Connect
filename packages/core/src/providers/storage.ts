@@ -19,6 +19,10 @@ const makeClient = (endpoint: string) =>
     region: env.S3_REGION,
     forcePathStyle: true, // MinIO
     credentials: { accessKeyId: env.S3_ACCESS_KEY, secretAccessKey: env.S3_SECRET_KEY },
+    // Newer SDKs add a CRC32 checksum to every request, and to a presigned PUT that means the
+    // checksum of an empty body: MinIO then rejects the real upload. Only send one when required.
+    requestChecksumCalculation: 'WHEN_REQUIRED',
+    responseChecksumValidation: 'WHEN_REQUIRED',
   });
 
 /** Internal client (server to MinIO) and a signing client that uses the public hostname. */

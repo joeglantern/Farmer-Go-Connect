@@ -1,6 +1,16 @@
 import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { call, closeApp, days, emailUser, makeApp, nextPhone, phoneUser, produceId } from './helpers.js';
+import {
+  call,
+  closeApp,
+  days,
+  emailUser,
+  makeApp,
+  nextPhone,
+  phoneUser,
+  postListing,
+  produceId,
+} from './helpers.js';
 
 /** B03: the home grid's eight category tiles with live counts. */
 describe('app categories', () => {
@@ -55,7 +65,7 @@ describe('app categories', () => {
     });
     const farmId = (await call(app, farmer, 'GET', '/v1/farms')).body[0].id;
     for (const slug of ['honey', 'beef', 'chicken', 'kale']) {
-      const l = await call(app, farmer, 'POST', '/v1/supply', {
+      const l = await postListing(app, farmer, {
         farmId,
         produceId: await produceId(app, slug),
         quantity: 10,

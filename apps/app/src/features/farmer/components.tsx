@@ -31,6 +31,8 @@ export function listingStatusView(l: Pick<ListingDto, 'status' | 'availableFrom'
 } {
   const now = Date.now();
   if (l.status === 'CANCELLED') return { labelKey: 'farmer.listingStatus.closed', tone: 'neutral' };
+  if (l.status === 'QA_REJECTED') return { labelKey: 'farmer.listingStatus.notApproved', tone: 'danger' };
+  if (l.status === 'PENDING_QA') return { labelKey: 'farmer.listingStatus.checking', tone: 'warning' };
   if (l.status === 'EXPIRED' || new Date(l.availableTo).getTime() < now - 86_400_000)
     return { labelKey: 'farmer.listingStatus.ended', tone: 'neutral' };
   if (l.status === 'FULLY_MATCHED') return { labelKey: 'farmer.listingStatus.soldOut', tone: 'success' };

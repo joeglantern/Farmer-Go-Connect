@@ -10,6 +10,7 @@ import {
   makeApp,
   nextPhone,
   phoneUser,
+  postListing,
   produceId,
   type Session,
 } from './helpers.js';
@@ -45,7 +46,7 @@ describe('notification deep links', () => {
     const farmId = (await call(app, farmer, 'GET', '/v1/farms')).body[0].id;
     const garlic = await produceId(app, 'garlic');
     const listingId = (
-      await call(app, farmer, 'POST', '/v1/supply', {
+      await postListing(app, farmer, {
         farmId,
         produceId: garlic,
         quantity: 200,

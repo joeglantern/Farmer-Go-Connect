@@ -46,6 +46,36 @@ export async function handleEventNotification(
       return;
     }
 
+    case 'supply.qa_requested': {
+      const l = await prisma.supplyListing.findUnique({
+        where: { id: p.listingId as string },
+        include: { produce: true, farm: true },
+      });
+      if (l?.status !== 'PENDING_QA') return;
+      await send(await usersWithRole(prisma, 'qa_officer', l.farm.county), {
+        template: 'listing_qa_requested',
+        link: { route: 'listing', params: { id: l.id } },
+        vars: { produce: l.produce.name, farm: l.farm.name, county: l.farm.county },
+        type,
+        data: { listingId: l.id },
+        importance: 'normal',
+      });
+      return;
+    }
+
+    case 'supply.qa_checked': {
+      const passed = p.passed === true;
+      await notifyUser(prisma, redis, p.farmerUserId as string, {
+        template: passed ? 'listing_qa_passed' : 'listing_qa_rejected',
+        link: { route: 'listing', params: { id: p.listingId as string } },
+        vars: { produce: p.produceName as string },
+        type,
+        data: { listingId: p.listingId, passed },
+        importance: passed ? 'normal' : 'high',
+      });
+      return;
+    }
+
     case 'match.proposed': {
       const m = await prisma.match.findUnique({
         where: { id: p.matchId as string },

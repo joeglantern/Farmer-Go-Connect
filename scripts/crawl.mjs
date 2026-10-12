@@ -122,7 +122,7 @@ const ROUTES = {
     'chat/[order]',
   ],
   agent: [...COMMON, 'agent/register', 'agent/farmer/[agentFarmer]'],
-  qa: [...COMMON, 'history', 'qa/[qaOrder]'],
+  qa: [...COMMON, 'history', 'qa/[qaOrder]', 'qa/listing/[qaListing]'],
   driver: [...COMMON, 'scan', 'history', 'route/[route]', 'stop/[stop]'],
   supplier: [...COMMON, 'products', 'input-orders', 'products/[myProduct]'],
   admin: [
@@ -215,6 +215,8 @@ async function idsFor(role, token, adminToken) {
   if (needs.has('agentFarmer'))
     await tryIt('agentFarmer', async () => firstId(await get('/v1/agent/farmers?limit=1')));
   if (needs.has('qaOrder')) await tryIt('qaOrder', async () => firstId(await get('/v1/qa/tasks')));
+  if (needs.has('qaListing'))
+    await tryIt('qaListing', async () => firstId(await get('/v1/qa/listings?county=all')));
   if (needs.has('route') || needs.has('stop'))
     await tryIt('route', async () => {
       const r = list(await get('/v1/routes/today'))[0];

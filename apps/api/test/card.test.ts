@@ -16,6 +16,7 @@ import {
   makeApp,
   nextPhone,
   phoneUser,
+  postListing,
   produceId,
   type Session,
 } from './helpers.js';
@@ -60,7 +61,7 @@ describe('card payments', () => {
     });
     const farmId = (await call(app, farmer, 'GET', '/v1/farms')).body[0].id;
     listingId = (
-      await call(app, farmer, 'POST', '/v1/supply', {
+      await postListing(app, farmer, {
         farmId,
         produceId: await produceId(app, 'spinach'),
         quantity: 500,

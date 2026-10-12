@@ -8,6 +8,7 @@ import {
   makeApp,
   nextPhone,
   phoneUser,
+  postListing,
   produceId,
   type Session,
 } from './helpers.js';
@@ -40,7 +41,7 @@ describe('public farmer profiles', () => {
     });
     const farmId = (await call(app, s, 'GET', '/v1/farms')).body[0].id;
     if (opts.list) {
-      await call(app, s, 'POST', '/v1/supply', {
+      await postListing(app, s, {
         farmId,
         produceId: await produceId(app, 'potatoes'),
         quantity: 200,

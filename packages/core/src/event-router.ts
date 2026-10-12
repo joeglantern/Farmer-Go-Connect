@@ -25,7 +25,12 @@ export function channelsFor<T extends DomainEventType>(type: T, p: DomainEvents[
     case 'supply.created':
     case 'supply.updated':
     case 'supply.harvest_ready':
+    case 'supply.qa_checked':
       out.push(ch.user(s('farmerUserId')!));
+      break;
+    case 'supply.qa_requested':
+      out.push(ch.user(s('farmerUserId')!), ch.role('qa_officer'));
+      if (s('county')) out.push(ch.role('qa_officer', s('county')));
       break;
     case 'match.proposed':
     case 'match.accepted':
@@ -106,6 +111,8 @@ export function channelsFor<T extends DomainEventType>(type: T, p: DomainEvents[
 /** Events that produce user notifications (handled by the notify worker). */
 const NOTIFYING = new Set<DomainEventType>([
   'farmer.created_by_agent',
+  'supply.qa_requested',
+  'supply.qa_checked',
   'match.proposed',
   'match.accepted',
   'order.created',

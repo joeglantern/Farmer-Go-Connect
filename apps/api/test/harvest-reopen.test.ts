@@ -8,6 +8,7 @@ import {
   makeApp,
   nextPhone,
   phoneUser,
+  postListing,
   produceId,
   type Session,
 } from './helpers.js';
@@ -22,7 +23,7 @@ describe('harvest ready undo and reopening listings', () => {
 
   const listing = async (quantity = 50) =>
     (
-      await call(app, farmer, 'POST', '/v1/supply', {
+      await postListing(app, farmer, {
         farmId,
         produceId: await produceId(app, 'coriander'),
         quantity,

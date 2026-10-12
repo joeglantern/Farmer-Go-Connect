@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, View } from 'react-native';
 import { ListingRow } from '../../features/farmer/components';
-import { isLiveListing, useMyListings } from '../../features/farmer/data';
+import { isInCheck, isLiveListing, useMyListings } from '../../features/farmer/data';
 import { ListingDetail } from '../../features/farmer/ListingDetail';
 import { produceName } from '../../lib/format';
 import { useSizeClass, useTheme } from '../../theme/theme';
@@ -15,9 +15,9 @@ import { EmptyState, ErrorState } from '../../ui/States';
 import { Text } from '../../ui/Text';
 import { SearchField } from '../../ui/TextField';
 
-type Scope = 'live' | 'upcoming' | 'closed';
+type Scope = 'live' | 'checking' | 'upcoming' | 'closed';
 
-/** My listings: live, upcoming and closed. Tablets and desktop show the listing beside the list. */
+/** My listings: live, being checked, upcoming and closed. Tablets and desktop show the listing beside the list. */
 export default function Listings() {
   const t = useTheme();
   const { t: tr } = useTranslation();
@@ -31,9 +31,10 @@ export default function Listings() {
   const all = useMemo(() => q.data?.pages.flatMap((p) => p.items) ?? [], [q.data]);
   const buckets = useMemo(() => {
     const now = Date.now();
-    const b: Record<Scope, typeof all> = { live: [], upcoming: [], closed: [] };
+    const b: Record<Scope, typeof all> = { live: [], checking: [], upcoming: [], closed: [] };
     for (const l of all) {
       if (!isLiveListing(l)) b.closed.push(l);
+      else if (isInCheck(l)) b.checking.push(l);
       else if (new Date(l.availableFrom).getTime() > now) b.upcoming.push(l);
       else b.live.push(l);
     }
@@ -59,6 +60,11 @@ export default function Listings() {
           }}
           options={[
             { value: 'live', label: tr('listings.live'), count: buckets.live.length || undefined },
+            {
+              value: 'checking',
+              label: tr('listings.checkingTab'),
+              count: buckets.checking.length || undefined,
+            },
             {
               value: 'upcoming',
               label: tr('listings.upcoming'),
@@ -102,7 +108,7 @@ export default function Listings() {
               title={search ? tr('listings.noMatch') : tr(`listings.empty.${scope}`)}
               body={search ? undefined : tr('listings.emptyBody')}
               action={
-                scope === 'closed' || search
+                scope === 'closed' || scope === 'checking' || search
                   ? undefined
                   : { label: tr('farmer.listProduce'), icon: 'plus', onPress: () => router.navigate('/sell') }
               }

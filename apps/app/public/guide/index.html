@@ -147,14 +147,14 @@ svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none;
 .h2 { font-size: clamp(32px, 4.2vw, 54px); font-weight: 900; letter-spacing: -.03em; line-height: 1.02; margin: 0; text-wrap: balance; max-width: 18ch; }
 .sub { color: var(--ink-2); max-width: 60ch; margin: 16px 0 0; font-size: 18px; }
 .track {
-  --fill: 0; position: relative; display: grid; grid-template-columns: repeat(7, minmax(150px, 1fr)); gap: 0;
+  --fill: 0; position: relative; display: grid; grid-template-columns: repeat(8, minmax(150px, 1fr)); gap: 0;
   margin-top: 48px; overflow-x: auto; padding: 8px 0 20px; scroll-snap-type: x mandatory; scrollbar-width: thin;
 }
 .track::before, .track::after {
   content: ""; position: absolute; top: 37px; left: 28px; height: 3px; border-radius: 3px;
 }
-.track::before { right: 28px; background: var(--line); min-width: calc(7 * 150px - 56px); }
-.track::after { width: calc(100% - 56px); min-width: calc(7 * 150px - 56px); transform-origin: left center; transform: scaleX(var(--fill)); background: linear-gradient(90deg, var(--leaf), var(--primary)); transition: transform .15s linear; }
+.track::before { right: 28px; background: var(--line); min-width: calc(8 * 150px - 56px); }
+.track::after { width: calc(100% - 56px); min-width: calc(8 * 150px - 56px); transform-origin: left center; transform: scaleX(var(--fill)); background: linear-gradient(90deg, var(--leaf), var(--primary)); transition: transform .15s linear; }
 .stop { position: relative; padding: 0 14px 0 0; scroll-snap-align: start; }
 .dot {
   position: relative; z-index: 1; width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center;
@@ -394,9 +394,10 @@ footer p { margin: 0; max-width: 52ch; }
 </section>
 
 <section class="journey wrap" aria-labelledby="journey-h">
-  <h2 class="h2" id="journey-h">One order, from request to payout.</h2>
-  <p class="sub">Every FarmGo order passes through the same hands. Knowing the path makes every screen easier to read. The labels in green are the status you will see on the order.</p>
+  <h2 class="h2" id="journey-h">From the farm to payout.</h2>
+  <p class="sub">Every listing is checked before buyers see it, and every order passes through the same hands. Knowing the path makes every screen easier to read. The labels in green are the status you will see on the order.</p>
   <div class="track" id="track">
+    <div class="stop"><div class="dot"><svg class="i"><use href="#i-shield"/></svg></div><p class="who">Farmer and QA officer</p><h3>Listing is checked</h3><p>A QA officer approves new produce at the farm before buyers can see it.</p><span class="status warn">Being checked</span></div>
     <div class="stop"><div class="dot"><svg class="i"><use href="#i-cart"/></svg></div><p class="who">Buyer</p><h3>Orders and pays</h3><p>Checks out and pays by M-Pesa, or adds it to an invoice.</p><span class="status warn">Waiting for farmer</span></div>
     <div class="stop"><div class="dot"><svg class="i"><use href="#i-sprout"/></svg></div><p class="who">Farmer</p><h3>Confirms the order</h3><p>Accepts it and starts the harvest.</p><span class="status">Confirmed</span></div>
     <div class="stop"><div class="dot"><svg class="i"><use href="#i-leaf"/></svg></div><p class="who">Farmer</p><h3>Marks harvest ready</h3><p>The produce waits at the farm gate for checking.</p><span class="status">Quality check</span></div>
@@ -418,7 +419,7 @@ footer p { margin: 0; max-width: 52ch; }
     <a href="#buyer"><svg class="i"><use href="#i-basket"/></svg>Buyers<span class="n">9</span></a>
     <a href="#farmer"><svg class="i"><use href="#i-sprout"/></svg>Farmers<span class="n">7</span></a>
     <a href="#agent"><svg class="i"><use href="#i-clip"/></svg>Field agents<span class="n">2</span></a>
-    <a href="#qa"><svg class="i"><use href="#i-shield"/></svg>QA officers<span class="n">2</span></a>
+    <a href="#qa"><svg class="i"><use href="#i-shield"/></svg>QA officers<span class="n">3</span></a>
     <a href="#driver"><svg class="i"><use href="#i-truck"/></svg>Drivers<span class="n">3</span></a>
     <a href="#supplier"><svg class="i"><use href="#i-box"/></svg>Youth enterprises<span class="n">3</span></a>
     <a href="#admin"><svg class="i"><use href="#i-gauge"/></svg>Admins<span class="n">3</span></a>
@@ -639,14 +640,15 @@ footer p { margin: 0; max-width: 52ch; }
       <div class="phone"><img src="shots/farmer-sell.webp" alt="List produce, step 2 of 6, What are you selling, with produce tiles" loading="lazy" width="390" height="844"></div>
       <div class="copy">
         <h3>List produce for sale</h3>
-        <p class="why">Six short steps, from choosing the farm to publishing. You can list produce that is still growing.</p>
+        <p class="why">Six short steps, from choosing the farm to sending it for its quality check. You can list produce that is still growing.</p>
         <ol class="steps">
           <li>Tap the green <span class="ui go">Sell</span> button in the middle of your tab bar.</li>
           <li>Answer <span class="ui">Which farm is this from?</span> and <span class="ui">What are you selling?</span>, then tap <span class="ui go">Continue</span>.</li>
           <li>Enter the <span class="ui">Quantity you can supply</span>, your <span class="ui">Price per</span> unit and the <span class="ui">Grade</span>. Not sure of the price? Tap <span class="ui">Use the market price</span>.</li>
           <li>Set <span class="ui">Ready from</span> and <span class="ui">Available until</span>, and add photos of your produce.</li>
-          <li>Check everything and tap <span class="ui go">Publish listing</span>. You will see <span class="ui">Your listing is live</span>. Not ready yet? Tap <span class="ui">Save as paused</span> instead.</li>
+          <li>Check everything and tap <span class="ui go">Send for quality check</span>. You will see <span class="ui">Sent for quality check</span>. Not ready yet? Tap <span class="ui">Save as paused</span> instead.</li>
         </ol>
+        <div class="note"><svg class="i"><use href="#i-shield"/></svg><div><b>Every new listing is checked first.</b> A QA officer visits your farm to check the produce. Until then the listing shows <span class="ui">Being checked</span> and buyers cannot see it. We tell you as soon as it is approved.</div></div>
       </div>
     </article>
 
@@ -659,7 +661,8 @@ footer p { margin: 0; max-width: 52ch; }
         <h3>Manage your listings</h3>
         <p class="why">Keep your stock and prices right so buyers only order what you can deliver.</p>
         <ol class="steps">
-          <li>Open your listings from Home. They are grouped as <span class="ui">Live</span>, <span class="ui">Upcoming</span> and <span class="ui">Closed</span>.</li>
+          <li>Open your listings from Home. They are grouped as <span class="ui">Live</span>, <span class="ui">Checking</span>, <span class="ui">Upcoming</span> and <span class="ui">Closed</span>.</li>
+          <li>A listing marked <span class="ui">Not approved</span> shows the officer's note. Fix what they found with <span class="ui">Edit listing</span>, then tap <span class="ui go">Send for check again</span>.</li>
           <li>Open one to <span class="ui">Edit listing</span>, <span class="ui">Pause</span> it, or <span class="ui">Close listing</span>.</li>
           <li>A closed listing can go back on sale with <span class="ui">Put back on the market</span>.</li>
         </ol>
@@ -766,9 +769,24 @@ footer p { margin: 0; max-width: 52ch; }
   <!-- ═══ QA ═══ -->
   <section class="chapter" id="qa" aria-labelledby="qa-h">
     <div class="opener">
-      <div><h2 id="qa-h">QA officers</h2><p>Inspect produce at the farm gate. Your result decides what the buyer pays for and what the farmer is paid.</p></div>
+      <div><h2 id="qa-h">QA officers</h2><p>Approve new listings before buyers see them, and inspect every order at the farm gate. Your result decides what the buyer pays for and what the farmer is paid.</p></div>
       <div class="tabs" aria-label="Your bottom tabs"><p class="tabs-label">Your tabs</p><span>Tasks</span><span>History</span><span>Profile</span></div>
     </div>
+
+    <article class="task" data-title="Approve a new listing" data-chapter="QA officers">
+      <div class="phone"><img src="shots/qa-listing.webp" alt="Check listing screen with the farmer's photos, Approve or Do not approve, grade and note" loading="lazy" width="390" height="844"></div>
+      <div class="copy">
+        <h3>Approve a new listing</h3>
+        <p class="why">Buyers only see produce you have approved. New listings appear at the top of your home under <span class="ui">Listings to check</span>.</p>
+        <ol class="steps">
+          <li>Call the farmer or tap directions, and visit the farm. Then tap <span class="ui go">Check listing</span>.</li>
+          <li>Compare the produce with the farmer's photos, quantity and dates.</li>
+          <li>Choose <span class="ui">Approve</span> and set the <span class="ui">Grade</span>, or choose <span class="ui">Do not approve</span> and say what needs fixing. Add your own photos.</li>
+          <li>Tap <span class="ui go">Approve listing</span>, or <span class="ui">Send back to farmer</span>. The farmer is told straight away.</li>
+        </ol>
+        <div class="note"><svg class="i"><use href="#i-leaf"/></svg><div>A farmer can fix a listing you sent back and send it again. It comes back to your list.</div></div>
+      </div>
+    </article>
 
     <article class="task" data-title="Choose an inspection" data-chapter="QA officers">
       <div class="phone"><img src="shots/qa-home.webp" alt="Inspections list with waiting orders and Start inspection buttons" loading="lazy" width="390" height="844"></div>
@@ -829,9 +847,10 @@ footer p { margin: 0; max-width: 52ch; }
           <li>Open the stop and tap <span class="ui">Navigate</span>. When you arrive, tap <span class="ui">I am here</span>.</li>
           <li>Tap <span class="ui">Scan crates</span> and scan each crate as you load or unload it. If a code will not scan, type it under <span class="ui">Or type the code</span>.</li>
           <li>At a farm, tap <span class="ui go">Confirm pickup</span>.</li>
-          <li>At a buyer, add a photo or a signature under <span class="ui">Proof of delivery</span>, fill in <span class="ui">Received by</span>, and tap <span class="ui go">Confirm delivery</span>.</li>
+          <li>At a buyer, add a photo under <span class="ui">Proof of delivery</span> and fill in <span class="ui">Received by</span>. Under <span class="ui">How they confirm</span>, they can sign, or choose <span class="ui">Code by SMS</span>.</li>
+          <li>For anyone who cannot sign, tap <span class="ui">Send code to buyer</span>. They read out or show the 4-digit code from the SMS, and you type it in. Then tap <span class="ui go">Confirm delivery</span>.</li>
         </ol>
-        <div class="note warn"><svg class="i"><use href="#i-alert"/></svg><div>The buyer is not charged for crates you do not scan. Scan empty crates the buyer returns too.</div></div>
+        <div class="note warn"><svg class="i"><use href="#i-alert"/></svg><div>The buyer is not charged for crates you do not scan. Scan empty crates the buyer returns too. After five wrong codes the code stops working: ask them to sign, or take a photo instead.</div></div>
       </div>
     </article>
 
@@ -980,6 +999,7 @@ footer p { margin: 0; max-width: 52ch; }
         <h3>Order statuses</h3>
         <p>Buyers and farmers see the same order with slightly different words where it helps.</p>
         <ul class="rows">
+          <li><span class="status warn">Being checked</span><span>A new listing waiting for a QA officer. Buyers cannot see it yet.</span></li>
           <li><span class="status warn">Waiting for farmer</span><span>Placed and paid. Farmers see this as <b>New order</b>.</span></li>
           <li><span class="status">Confirmed</span><span>The farmer accepted it. Farmers see <b>To harvest</b>.</span></li>
           <li><span class="status">Quality check</span><span>Harvested and waiting for a QA officer.</span></li>

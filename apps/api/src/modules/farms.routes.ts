@@ -126,7 +126,10 @@ export default async function farmRoutes(app: FastifyInstance) {
       const farm = await loadManageableFarm(req, req.params.id);
       const [open, busy, any] = await Promise.all([
         app.prisma.supplyListing.count({
-          where: { farmId: farm.id, status: { in: ['OPEN', 'PARTIALLY_MATCHED', 'DRAFT'] } },
+          where: {
+            farmId: farm.id,
+            status: { in: ['OPEN', 'PARTIALLY_MATCHED', 'DRAFT', 'PENDING_QA', 'QA_REJECTED'] },
+          },
         }),
         app.prisma.order.count({
           where: {

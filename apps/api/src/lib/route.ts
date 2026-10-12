@@ -27,7 +27,7 @@ export type Serializable<T> = T extends string
             : T;
 
 /** URL fields the serializer derives from stored keys (see plugins/serialize.ts); handlers omit them. */
-type DerivedUrlKey = 'imageUrl' | 'photoUrl' | 'photoUrls' | 'podPhotoUrl' | 'signatureUrl';
+type DerivedUrlKey = 'imageUrl' | 'photoUrl' | 'photoUrls' | 'qaPhotoUrls' | 'podPhotoUrl' | 'signatureUrl';
 
 export interface FarmGoTypeProvider extends FastifyTypeProvider {
   validator: this['schema'] extends $ZodType ? output<this['schema']> : unknown;

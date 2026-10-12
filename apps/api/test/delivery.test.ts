@@ -1,7 +1,17 @@
 import { deliverySlots, dropoffsByWindow } from '@farmgo/core';
 import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { call, closeApp, days, emailUser, makeApp, nextPhone, phoneUser, produceId } from './helpers.js';
+import {
+  call,
+  closeApp,
+  days,
+  emailUser,
+  makeApp,
+  nextPhone,
+  phoneUser,
+  postListing,
+  produceId,
+} from './helpers.js';
 
 /** B09: delivery dates and windows, the next-day cut-off, and drop-offs ordered by window. */
 describe('delivery slots', () => {
@@ -73,7 +83,7 @@ describe('delivery slots', () => {
     });
     const farmId = (await call(app, farmer, 'GET', '/v1/farms')).body[0].id;
     const listingId = (
-      await call(app, farmer, 'POST', '/v1/supply', {
+      await postListing(app, farmer, {
         farmId,
         produceId: await produceId(app, 'onions-red'),
         quantity: 50,

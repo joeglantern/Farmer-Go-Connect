@@ -18,6 +18,7 @@ import { loadManageableFarm } from './farms.routes.js';
 import { searchListingIds, searchOrigin } from './supply.search.js';
 import {
   createListing,
+  HIDDEN_LISTING_STATUSES,
   markHarvestReady,
   publicListingInclude,
   undoHarvestReady,
@@ -137,8 +138,14 @@ export default async function supplyRoutes(app: FastifyInstance) {
         where: { id: listing.farmId, farmer: { userId: user.id } },
       });
       // Drafts are hidden from the list, so they are hidden by id too (QA-031): only the farmer,
-      // their onboarding agent and admins see them.
-      if (listing.status === 'DRAFT' && !owner && !isAdmin(user)) {
+      // their onboarding agent and admins see them. Listings waiting for (or refused by) their QA
+      // check are hidden the same way; QA officers may also open them.
+      if (
+        HIDDEN_LISTING_STATUSES.includes(listing.status) &&
+        !owner &&
+        !isAdmin(user) &&
+        !(roleOf(user) === 'qa_officer' && listing.status !== 'DRAFT')
+      ) {
         const agent =
           roleOf(user) === 'agent' &&
           (await app.prisma.farm.count({

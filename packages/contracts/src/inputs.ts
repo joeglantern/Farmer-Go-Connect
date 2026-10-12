@@ -175,6 +175,19 @@ export const CreateListingInput = listingBase.refine((v) => v.availableTo >= v.a
   path: ['availableTo'],
 });
 export type CreateListingInput = z.infer<typeof CreateListingInput>;
+/** POST /v1/qa/listings/:id/check: the officer's decision on a new listing. */
+export const ListingCheckInput = z
+  .object({
+    passed: z.boolean(),
+    grade: z.string().max(8).optional(),
+    note: z.string().max(500).optional(),
+    photos: Photos,
+  })
+  .refine((v) => v.passed || (v.note?.trim().length ?? 0) >= 3, {
+    message: 'Say why the listing is not approved',
+    path: ['note'],
+  });
+export type ListingCheckInput = z.infer<typeof ListingCheckInput>;
 export const UpdateListingInput = listingBase
   .omit({ farmId: true, produceId: true, status: true })
   .partial()
@@ -327,9 +340,12 @@ export const QaTaskQuery = z.object({
 
 export const BuildRoutesInput = z.object({ date: IsoDate, county: County.optional() });
 export const AssignDriverInput = z.object({ driverId: Id, vehicle: z.string().max(40).optional() });
+/** The recipient's code from the SMS: an alternative to signing (POST /v1/stops/:id/delivery-code sends it). */
+export const DeliveryCode = z.string().regex(/^\d{4}$/, 'The code is 4 digits');
 export const CompleteStopInput = z.object({
   podPhotoKey: ObjectKey.optional(),
   signatureKey: ObjectKey.optional(),
+  deliveryCode: DeliveryCode.optional(),
   recipientName: z.string().max(120).optional(),
   crateQrCodes: z.array(z.string().max(64)).max(200).default([]),
   cratesCollectedQrCodes: z.array(z.string().max(64)).max(200).default([]),

@@ -134,7 +134,7 @@ export default function LeafletMap({
     g.clearLayers();
     if (path && path.length > 1) {
       L.polyline(path, {
-        color: dark ? '#7FC593' : '#1C6536',
+        color: dark ? '#34C766' : '#1C6536',
         weight: 4,
         opacity: 0.85,
         dashArray: '1 8',
@@ -165,7 +165,7 @@ export default function LeafletMap({
         height,
         borderRadius: 16,
         overflow: 'hidden',
-        background: dark ? '#10281A' : '#E9F2E4',
+        background: dark ? '#141416' : '#E9F2E4',
       }}
     />
   );

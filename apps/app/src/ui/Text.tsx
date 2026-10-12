@@ -39,7 +39,7 @@ export function Text({
     default: t.colors.text,
     secondary: t.colors.textSecondary,
     tertiary: t.colors.textTertiary,
-    brand: t.colors.primary,
+    brand: t.colors.primaryContent,
     leaf: t.colors.leaf,
     onBrand: t.colors.textOnBrand,
     onBrandMuted: t.colors.textOnBrandMuted,

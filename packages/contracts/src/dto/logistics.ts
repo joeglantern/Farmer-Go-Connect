@@ -56,3 +56,10 @@ export const LocationAcceptedDto = z.object({
   accepted: z.boolean(),
 });
 export type LocationAcceptedDto = z.infer<typeof LocationAcceptedDto>;
+
+/** POST /v1/stops/:id/delivery-code: the code went by SMS to the buyer. */
+export const DeliveryCodeSentDto = z.object({
+  /** The number the code went to, masked, e.g. "+254 7** *** 678". */
+  sentTo: z.string(),
+});
+export type DeliveryCodeSentDto = z.infer<typeof DeliveryCodeSentDto>;

@@ -1,4 +1,11 @@
-import type { InspectionHistoryPageDto, QaDashboardDto, QaTaskDto, QaTaskListDto } from '@farmgo/contracts';
+import type {
+  InspectionHistoryPageDto,
+  QaDashboardDto,
+  QaListingTaskDto,
+  QaListingTaskListDto,
+  QaTaskDto,
+  QaTaskListDto,
+} from '@farmgo/contracts';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { Linking, Platform } from 'react-native';
 import type { z } from 'zod';
@@ -11,6 +18,21 @@ export function useQaTasks(county: string = 'all') {
     queryFn: () => api.get<QaTaskListDto>('/v1/qa/tasks', { county }),
     refetchInterval: 60_000,
   });
+}
+
+/** New listings waiting for their check at the farm, in every county, oldest first. */
+export function useQaListings() {
+  return useQuery({
+    queryKey: ['qaListings'],
+    queryFn: () => api.get<QaListingTaskListDto>('/v1/qa/listings', { county: 'all' }),
+    refetchInterval: 60_000,
+  });
+}
+
+/** One listing waiting for its check, from the same list (shares the QA home's cache). */
+export function useQaListing(id: string | undefined) {
+  const q = useQaListings();
+  return { ...q, data: q.data?.find((l) => l.id === id) as QaListingTaskDto | undefined };
 }
 
 /** B10 QA dashboard: work waiting per county, today's count, pass rate this month. */

@@ -2,7 +2,7 @@ import { COUNTIES } from '@farmgo/contracts';
 import * as Location from 'expo-location';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, Platform, StyleSheet, View } from 'react-native';
 import { useTheme } from '../theme/theme';
 import { Button } from './Button';
 import { Icon } from './Icon';
@@ -79,7 +79,13 @@ export function CountyPicker({
   }, [q]);
   return (
     <Sheet visible={visible} onClose={onClose} title={tr('setup.county')} scroll={false}>
-      <SearchField value={q} onChangeText={setQ} placeholder={tr('common.search')} autoFocus />
+      {/* No autofocus on phones: the keyboard would cover the list before anyone can scroll it. */}
+      <SearchField
+        value={q}
+        onChangeText={setQ}
+        placeholder={tr('common.search')}
+        autoFocus={Platform.OS === 'web'}
+      />
       <FlatList
         data={list}
         keyExtractor={(c) => c}

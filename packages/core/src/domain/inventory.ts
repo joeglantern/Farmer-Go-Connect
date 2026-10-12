@@ -25,7 +25,7 @@ export async function releaseListing(db: DB, listingId: string, qty: number): Pr
     `UPDATE "SupplyListing"
         SET "quantityLeft" = LEAST(quantity, "quantityLeft" + $2::numeric),
             status = (CASE
-                        WHEN status IN ('EXPIRED', 'CANCELLED', 'DRAFT') THEN status::text
+                        WHEN status IN ('EXPIRED', 'CANCELLED', 'DRAFT', 'PENDING_QA', 'QA_REJECTED') THEN status::text
                         WHEN LEAST(quantity, "quantityLeft" + $2::numeric) >= quantity THEN 'OPEN'
                         ELSE 'PARTIALLY_MATCHED' END)::"ListingStatus",
             "updatedAt" = now()

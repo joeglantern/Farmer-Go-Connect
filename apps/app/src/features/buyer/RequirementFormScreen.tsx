@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useProduce } from '../../data/catalog';
 import i18n from '../../i18n';
 import { humanError } from '../../lib/errors';
@@ -343,7 +343,12 @@ function ProduceSheet({
   );
   return (
     <Sheet visible={visible} onClose={onClose} title={tr('requirements.pickProduce')} scroll={false}>
-      <SearchField value={q} onChangeText={setQ} placeholder={tr('requirements.searchProduce')} autoFocus />
+      <SearchField
+        value={q}
+        onChangeText={setQ}
+        placeholder={tr('requirements.searchProduce')}
+        autoFocus={Platform.OS === 'web'}
+      />
       {loading ? (
         <Skeleton height={200} />
       ) : error ? (

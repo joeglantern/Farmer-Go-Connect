@@ -15,6 +15,8 @@ export interface DomainEvents {
   'supply.created': { listingId: string; farmerUserId: string; produceId: string; county: string };
   'supply.updated': { listingId: string; farmerUserId: string };
   'supply.harvest_ready': { listingId: string; farmerUserId: string };
+  'supply.qa_requested': { listingId: string; farmerUserId: string; county: string };
+  'supply.qa_checked': { listingId: string; farmerUserId: string; passed: boolean; produceName: string };
 
   'match.proposed': {
     matchId: string;

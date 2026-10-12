@@ -2,6 +2,7 @@ export * from './domain/audit.js';
 export * from './domain/checkout.js';
 export * from './domain/codes.js';
 export * from './domain/crates.js';
+export * from './domain/delivery-code.js';
 export * from './domain/demand.js';
 export * from './domain/disputes.js';
 export * from './domain/geo.js';

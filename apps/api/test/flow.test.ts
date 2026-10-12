@@ -10,6 +10,7 @@ import {
   makeApp,
   nextPhone,
   phoneUser,
+  postListing,
   produceId,
   type Session,
 } from './helpers.js';
@@ -79,7 +80,7 @@ describe('demand-led supply flow', () => {
   });
 
   it('the farmer lists an upcoming tomato harvest', async () => {
-    const res = await call(app, farmer, 'POST', '/v1/supply', {
+    const res = await postListing(app, farmer, {
       farmId,
       produceId: await produceId(app, 'tomatoes'),
       quantity: 500,

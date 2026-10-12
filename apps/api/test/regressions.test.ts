@@ -8,6 +8,7 @@ import {
   makeApp,
   nextPhone,
   phoneUser,
+  postListing,
   produceId,
   type Session,
 } from './helpers.js';
@@ -40,7 +41,7 @@ async function onboardFarmerWithListing(app: FastifyInstance, s: Session, slug =
     farm: { name: 'Kariuki Farm', county: 'Kiambu', lat: -1.05, lng: 36.9 },
   });
   const farm = (await call(app, s, 'GET', '/v1/farms')).body[0];
-  const listing = await call(app, s, 'POST', '/v1/supply', {
+  const listing = await postListing(app, s, {
     farmId: farm.id,
     produceId: await produceId(app, slug),
     quantity: 1000,
@@ -389,7 +390,7 @@ describe('QA regressions (ticket 001)', () => {
 
   it('QA-014 money fields that do not fit a 32-bit integer are rejected with 400, not 500', async () => {
     const farm = (await call(app, farmer, 'GET', '/v1/farms')).body[0];
-    const r = await call(app, farmer, 'POST', '/v1/supply', {
+    const r = await postListing(app, farmer, {
       farmId: farm.id,
       produceId: await produceId(app, 'kale'),
       quantity: 10,
@@ -409,7 +410,7 @@ describe('QA regressions (ticket 001)', () => {
 
   it('QA-015 a listing quantity below the stored precision is rejected instead of creating an empty listing', async () => {
     const farm = (await call(app, farmer, 'GET', '/v1/farms')).body[0];
-    const r = await call(app, farmer, 'POST', '/v1/supply', {
+    const r = await postListing(app, farmer, {
       farmId: farm.id,
       produceId: await produceId(app, 'kale'),
       quantity: 0.001,

@@ -268,9 +268,12 @@ export async function completeStop(
   input: CompleteStopInput,
   driverId: string,
   isAdmin = false,
+  /** The recipient's SMS code was checked (see verifyDeliveryCode): proof of delivery like a signature. */
+  opts: { codeConfirmed?: boolean } = {},
 ) {
   const stop = await loadStopForDriver(tx, stopId, driverId, isAdmin);
   if (stop.status === 'COMPLETED') return stop;
+  const codeConfirmed = stop.kind === 'DROPOFF' && opts.codeConfirmed === true;
   const actor = isAdmin ? 'admin' : 'driver';
 
   if (stop.kind === 'PICKUP') {
@@ -297,8 +300,11 @@ export async function completeStop(
     if (pickup && pickup.status !== 'COMPLETED' && pickup.status !== 'SKIPPED') {
       throw new AppError('PICKUP_NOT_DONE', 'Collect this order from the farm before delivering it', 409);
     }
-    if (!input.podPhotoKey && !input.signatureKey) {
-      throw Errors.badRequest('POD_REQUIRED', 'Add a delivery photo or the recipient signature');
+    if (!input.podPhotoKey && !input.signatureKey && !codeConfirmed) {
+      throw Errors.badRequest(
+        'POD_REQUIRED',
+        'Add a delivery photo, the recipient signature or the code the buyer received by SMS',
+      );
     }
     for (const qr of input.crateQrCodes) {
       await scanCrate(
@@ -340,6 +346,7 @@ export async function completeStop(
       podPhotoKey: input.podPhotoKey,
       signatureKey: input.signatureKey,
       recipientName: input.recipientName,
+      ...(codeConfirmed ? { codeConfirmedAt: new Date() } : {}),
       cratesDropped: stop.kind === 'DROPOFF' ? input.crateQrCodes.length : 0,
       cratesCollected:
         input.cratesCollectedQrCodes.length + (stop.kind === 'PICKUP' ? input.crateQrCodes.length : 0),

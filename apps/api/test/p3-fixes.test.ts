@@ -9,6 +9,7 @@ import {
   makeApp,
   nextPhone,
   phoneUser,
+  postListing,
   produceId,
   type Session,
 } from './helpers.js';
@@ -49,7 +50,7 @@ describe('QA P3 fixes', () => {
     });
     farmId = (await call(app, farmer, 'GET', '/v1/farms')).body[0].id;
     listingId = (
-      await call(app, farmer, 'POST', '/v1/supply', {
+      await postListing(app, farmer, {
         farmId,
         produceId: await produceId(app, 'courgettes'),
         quantity: 100,
@@ -145,7 +146,7 @@ describe('QA P3 fixes', () => {
   });
 
   it('QA-031 a draft listing is hidden from other users by id', async () => {
-    const draft = await call(app, farmer, 'POST', '/v1/supply', {
+    const draft = await postListing(app, farmer, {
       farmId,
       produceId: await produceId(app, 'courgettes'),
       quantity: 20,

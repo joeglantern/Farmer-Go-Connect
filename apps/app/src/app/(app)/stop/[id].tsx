@@ -17,7 +17,7 @@ import { useLocationSharing } from '../../../features/driver/useLocationSharing'
 import { callPhone, openDirections } from '../../../features/qa/data';
 import { PhotoStrip, type UploadedPhoto } from '../../../features/qa/PhotoStrip';
 import { uploadBytes } from '../../../features/qa/upload';
-import { ApiError } from '../../../lib/api';
+import { ApiError, api } from '../../../lib/api';
 import { humanError } from '../../../lib/errors';
 import { produceName, qty, timeShort, unitLabel } from '../../../lib/format';
 import { useSizeClass, useTheme } from '../../../theme/theme';
@@ -60,6 +60,11 @@ export default function StopScreen() {
   const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
   const [recipient, setRecipient] = useState('');
   const [signature, setSignature] = useState<Uint8Array | null>(null);
+  // People who cannot sign confirm with a 4-digit code the buyer receives by SMS.
+  const [confirmBy, setConfirmBy] = useState<'sign' | 'code'>('sign');
+  const [codeSentTo, setCodeSentTo] = useState<string | null>(null);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [code, setCode] = useState('');
   const [saving, setSaving] = useState(false);
   const [podError, setPodError] = useState(false);
   const [failOpen, setFailOpen] = useState(false);
@@ -144,8 +149,25 @@ export default function StopScreen() {
       },
     );
 
+  const sendCode = async () => {
+    setSendingCode(true);
+    try {
+      const res = await api.post<{ sentTo: string }>(`/v1/stops/${stop.id}/delivery-code`, {});
+      setCodeSentTo(res.sentTo);
+      setCode('');
+      toast.success(tr('driver.codeSent', { to: res.sentTo }));
+    } catch (e) {
+      toast.error(humanError(e));
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
+  const hasCode = confirmBy === 'code' && /^\d{4}$/.test(code);
+  const hasProof = photos.length > 0 || (confirmBy === 'sign' && !!signature) || hasCode;
+
   const complete = async () => {
-    if (!pickup && photos.length === 0 && !signature) {
+    if (!pickup && !hasProof) {
       setPodError(true);
       toast.error(tr('driver.podRequired'));
       return;
@@ -162,15 +184,17 @@ export default function StopScreen() {
     }
     setSaving(true);
     try {
-      const signatureKey = signature
-        ? await uploadBytes('proof-of-delivery', signature, 'image/png')
-        : undefined;
+      const signatureKey =
+        signature && confirmBy === 'sign'
+          ? await uploadBytes('proof-of-delivery', signature, 'image/png')
+          : undefined;
       await action.mutateAsync({
         kind: 'complete',
         stopId: stop.id,
         body: {
           podPhotoKey: photos[0]?.key,
           signatureKey,
+          deliveryCode: !pickup && hasCode ? code : undefined,
           recipientName: recipient.trim() || undefined,
           crateQrCodes: crates,
           cratesCollectedQrCodes: pickup ? [] : returned,
@@ -445,16 +469,13 @@ export default function StopScreen() {
                   <Card
                     style={{
                       gap: 16,
-                      borderWidth: podError && !photos.length && !signature ? 1.5 : 0,
+                      borderWidth: podError && !hasProof ? 1.5 : 0,
                       borderColor: t.colors.danger,
                     }}
                   >
                     <View style={{ gap: 4 }}>
                       <Text variant="headline">{tr('driver.proof')}</Text>
-                      <Text
-                        variant="caption"
-                        tone={podError && !photos.length && !signature ? 'danger' : 'secondary'}
-                      >
+                      <Text variant="caption" tone={podError && !hasProof ? 'danger' : 'secondary'}>
                         {tr('driver.proofHint')}
                       </Text>
                     </View>
@@ -474,9 +495,61 @@ export default function StopScreen() {
                       autoCapitalize="words"
                       maxLength={120}
                     />
-                    <View style={{ gap: 6 }}>
-                      <Text variant="calloutStrong">{tr('driver.signature')}</Text>
-                      <SignaturePad onChange={setSignature} />
+                    <View style={{ gap: 10 }}>
+                      <Text variant="calloutStrong">{tr('driver.confirmBy')}</Text>
+                      <Segmented
+                        value={confirmBy}
+                        onChange={setConfirmBy}
+                        options={[
+                          { value: 'sign', label: tr('driver.signature') },
+                          { value: 'code', label: tr('driver.codeMode') },
+                        ]}
+                      />
+                      {confirmBy === 'sign' ? (
+                        <SignaturePad onChange={setSignature} />
+                      ) : (
+                        <View style={{ gap: 12 }}>
+                          <Text variant="callout" tone="secondary">
+                            {tr('driver.codeHelp')}
+                          </Text>
+                          {codeSentTo ? (
+                            <>
+                              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                                <Icon name="checkCircle" size={18} color={t.colors.success} weight="fill" />
+                                <Text variant="callout" style={{ flex: 1 }}>
+                                  {tr('driver.codeSent', { to: codeSentTo })}
+                                </Text>
+                                <Button
+                                  label={tr('driver.resendCode')}
+                                  variant="ghost"
+                                  size="sm"
+                                  fullWidth={false}
+                                  loading={sendingCode}
+                                  onPress={() => void sendCode()}
+                                />
+                              </View>
+                              <TextField
+                                label={tr('driver.codeLabel')}
+                                hint={tr('driver.codeHint')}
+                                value={code}
+                                onChangeText={(v) => setCode(v.replace(/\D/g, '').slice(0, 4))}
+                                keyboardType="number-pad"
+                                maxLength={4}
+                                autoComplete="one-time-code"
+                                textContentType="oneTimeCode"
+                              />
+                            </>
+                          ) : (
+                            <Button
+                              label={tr('driver.sendCode')}
+                              icon="chat"
+                              variant="secondary"
+                              loading={sendingCode}
+                              onPress={() => void sendCode()}
+                            />
+                          )}
+                        </View>
+                      )}
                     </View>
                   </Card>
                 )}

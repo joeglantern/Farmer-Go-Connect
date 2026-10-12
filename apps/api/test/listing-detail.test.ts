@@ -9,6 +9,7 @@ import {
   makeApp,
   nextPhone,
   phoneUser,
+  postListing,
   produceId,
   type Session,
 } from './helpers.js';
@@ -35,7 +36,7 @@ describe('listing detail enrichment', () => {
       farm: { name: farmName, county: COUNTY, lat, lng, isOrganic: !!opts.organic },
     });
     const farmId = (await call(app, f, 'GET', '/v1/farms')).body[0].id;
-    const r = await call(app, f, 'POST', '/v1/supply', {
+    const r = await postListing(app, f, {
       farmId,
       produceId: await produceId(app, 'passion-fruit'),
       quantity: 50,

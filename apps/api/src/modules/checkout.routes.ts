@@ -28,6 +28,7 @@ import { num } from '@farmgo/db';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { requireOrg, requirePermission } from '../lib/guards.js';
 import { accepted, created, ok, typed } from '../lib/route.js';
+import { HIDDEN_LISTING_STATUSES } from './supply.service.js';
 
 /** The buyer organization the caller shops for. */
 async function buyerContext(
@@ -108,7 +109,7 @@ export default async function checkoutRoutes(app: FastifyInstance) {
         await app.prisma.cartItem.deleteMany({ where: { buyerOrgId: ctx.buyerOrgId, listingId } });
       } else {
         const listing = await app.prisma.supplyListing.findUnique({ where: { id: listingId } });
-        if (!listing || listing.status === 'DRAFT') throw Errors.notFound('Listing');
+        if (!listing || HIDDEN_LISTING_STATUSES.includes(listing.status)) throw Errors.notFound('Listing');
         await app.prisma.cartItem.upsert({
           where: { buyerOrgId_listingId: { buyerOrgId: ctx.buyerOrgId, listingId } },
           create: { buyerOrgId: ctx.buyerOrgId, listingId, quantity },

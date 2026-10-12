@@ -5,7 +5,7 @@ import { z } from 'zod';
  * (and the API also returns them as `link`), so a tap goes straight to the right screen:
  *   order { id, section? } · match { id } · payout { orderId } | { inputOrderId } · route { id }
  *   demand { id } · demandBoard { produceId, county } · inputOrder { id } · checkout { id }
- *   invoice { id } · crates {} · profile {}
+ *   invoice { id } · crates {} · profile {} · listing { id }
  */
 export const DEEP_LINK_ROUTES = [
   'order',
@@ -19,6 +19,7 @@ export const DEEP_LINK_ROUTES = [
   'invoice',
   'crates',
   'profile',
+  'listing',
 ] as const;
 export const DeepLinkRoute = z.enum(DEEP_LINK_ROUTES);
 export type DeepLinkRoute = z.infer<typeof DeepLinkRoute>;

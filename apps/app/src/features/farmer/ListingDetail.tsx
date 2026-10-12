@@ -73,9 +73,27 @@ export function ListingDetail({ id, embedded }: { id: string; embedded?: boolean
   const sold = Math.max(0, total - left);
   const live = isLiveListing(l);
   const paused = l.status === 'DRAFT';
+  const checking = l.status === 'PENDING_QA';
+  const rejected = l.status === 'QA_REJECTED';
   const closed = l.status === 'CANCELLED' || !live;
   // An expired window can be reopened with a new end date (B25); a cancelled listing cannot.
   const expired = closed && l.status !== 'CANCELLED';
+
+  const resubmit = async () => {
+    const ok = await dialog.confirm({
+      title: tr('listings.resubmitTitle'),
+      message: tr('listings.resubmitBody'),
+      confirmLabel: tr('listings.resubmit'),
+      icon: 'shield',
+    });
+    if (!ok) return;
+    try {
+      await update.mutateAsync({ status: 'OPEN' });
+      toast.success(tr('listings.resubmitted'));
+    } catch (err) {
+      toast.error(humanError(err));
+    }
+  };
 
   const setStatus = async (status: 'OPEN' | 'DRAFT' | 'CANCELLED') => {
     const copy = {
@@ -216,11 +234,42 @@ export function ListingDetail({ id, embedded }: { id: string; embedded?: boolean
         </Card>
 
         {paused && <Banner tone="warning" message={tr('listings.pausedNote')} />}
+        {checking && <Banner tone="info" icon="shield" message={tr('listings.checkingNote')} />}
+        {rejected && (
+          <Banner
+            tone="danger"
+            title={
+              l.qaNote
+                ? tr('listings.rejectedNote', { note: l.qaNote })
+                : tr('farmer.listingStatus.notApproved')
+            }
+            message={tr('listings.rejectedHelp')}
+          />
+        )}
         {closed && !paused && (
           <Banner tone="info" message={expired ? tr('listings.expiredNote') : tr('listings.closedNote')} />
         )}
 
-        {!closed && (
+        {!closed && (checking || rejected) && (
+          <View style={styles.actions}>
+            {rejected && <Button label={tr('listings.resubmit')} icon="shield" onPress={resubmit} />}
+            <Button
+              label={tr('listings.edit')}
+              icon="edit"
+              variant={rejected ? 'outline' : 'primary'}
+              onPress={() => setEditOpen(true)}
+            />
+            <Button
+              label={tr('listings.close')}
+              icon="close"
+              variant="ghost"
+              size="md"
+              fullWidth={false}
+              onPress={() => setStatus('CANCELLED')}
+            />
+          </View>
+        )}
+        {!closed && !checking && !rejected && (
           <View style={styles.actions}>
             {!l.harvestReady && sold > 0 && (
               <Button

@@ -9,8 +9,8 @@ import { LeafMark } from './Logo';
  */
 export function BootScreen({ error, onRetry }: { error?: boolean; onRetry?: () => void }) {
   const dark = useColorScheme() === 'dark';
-  const bg = dark ? '#0A1510' : '#F4F7F3';
-  const fg = dark ? '#E7F0E9' : palette.green[900];
+  const bg = dark ? '#000000' : '#F4F7F3';
+  const fg = dark ? '#F5F5F7' : palette.green[900];
   return (
     <View
       style={{
@@ -50,7 +50,7 @@ export function BootScreen({ error, onRetry }: { error?: boolean; onRetry?: () =
         </>
       ) : (
         <ActivityIndicator
-          color={dark ? '#7FC593' : palette.green[700]}
+          color={dark ? '#34C766' : palette.green[700]}
           accessibilityLabel={i18n.t('common.loading')}
         />
       )}

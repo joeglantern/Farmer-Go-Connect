@@ -222,6 +222,8 @@ export default function AgentFarmer() {
 const LISTING_TONE: Record<string, Tone> = {
   OPEN: 'success',
   PARTIALLY_MATCHED: 'info',
+  PENDING_QA: 'warning',
+  QA_REJECTED: 'danger',
   FULLY_MATCHED: 'brand',
   DRAFT: 'neutral',
   EXPIRED: 'neutral',

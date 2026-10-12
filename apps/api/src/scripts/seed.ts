@@ -262,10 +262,33 @@ async function seedDemoData() {
             pricePerUnit: l.price,
             availableFrom: days(l.inDays),
             availableTo: days(l.inDays + 10),
+            // Demo produce is live: it has already passed its QA check.
+            status: 'OPEN',
+            qaApprovedAt: new Date(),
           },
         });
       }
     }
+  }
+
+  // One new listing from the first demo farmer (Kiambu) waiting for the QA officer's check.
+  const firstFarm = await prisma.farm.findFirst({
+    where: { farmer: { user: { phoneNumber: farmers[0]!.phone } } },
+  });
+  if (firstFarm && (await prisma.supplyListing.count({ where: { status: 'PENDING_QA' } })) === 0) {
+    await prisma.supplyListing.create({
+      data: {
+        farmId: firstFarm.id,
+        produceId: produce.cabbage!.id,
+        quantity: 250,
+        quantityLeft: 250,
+        pricePerUnit: 3_500,
+        availableFrom: days(2),
+        availableTo: days(12),
+        status: 'PENDING_QA',
+        notes: 'Freshly cut, firm heads',
+      },
+    });
   }
 
   // Buyer demand: a weekly tomato requirement and some one-off needs

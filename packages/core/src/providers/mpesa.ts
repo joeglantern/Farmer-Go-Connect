@@ -78,7 +78,8 @@ export class MockMpesa implements MpesaProvider {
   }
 
   async stkQuery(checkoutRequestId: string): Promise<StkQueryResult> {
-    if (checkoutRequestId.endsWith('_C')) return { resultCode: '1032', resultDesc: 'Request cancelled by user' };
+    if (checkoutRequestId.endsWith('_C'))
+      return { resultCode: '1032', resultDesc: 'Request cancelled by user' };
     if (checkoutRequestId.endsWith('_F'))
       return { resultCode: '1', resultDesc: 'The balance is insufficient for the transaction' };
     return { resultCode: '0', resultDesc: 'The service request is processed successfully.' };

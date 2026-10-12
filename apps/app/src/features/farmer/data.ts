@@ -89,7 +89,12 @@ export function useDeleteFarm(id: string) {
 // ─── Listings ─────────────────────────────────────────────────
 
 export type ListingScope = 'active' | 'upcoming' | 'closed';
-const ACTIVE = ['OPEN', 'PARTIALLY_MATCHED', 'DRAFT'];
+const ACTIVE = ['OPEN', 'PARTIALLY_MATCHED', 'DRAFT', 'PENDING_QA', 'QA_REJECTED'];
+
+/** A new listing still waiting for, or sent back from, its quality check at the farm. */
+export function isInCheck(l: Pick<ListingDto, 'status'>) {
+  return l.status === 'PENDING_QA' || l.status === 'QA_REJECTED';
+}
 
 export function isLiveListing(l: Pick<ListingDto, 'status' | 'availableTo'>) {
   return ACTIVE.includes(l.status) && new Date(l.availableTo).getTime() >= Date.now() - 86_400_000;

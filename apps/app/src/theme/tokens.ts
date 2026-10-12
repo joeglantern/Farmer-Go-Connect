@@ -55,6 +55,8 @@ export interface ColorRoles {
   primaryPressed: string;
   primaryTint: string;
   primaryTintStrong: string;
+  /** Green for text and icons on surfaces (links, outline buttons, brand pills). Brighter than primary in dark mode. */
+  primaryContent: string;
   /** Deep forest bands (dashboard headers, promo footers). */
   band: string;
   bandText: string;
@@ -98,6 +100,7 @@ export const lightColors: ColorRoles = {
   primaryPressed: green[800],
   primaryTint: green[50],
   primaryTintStrong: green[100],
+  primaryContent: green[700],
   band: green[900],
   bandText: '#FFFFFF',
   leaf: green[500],
@@ -122,46 +125,53 @@ export const lightColors: ColorRoles = {
   skeletonHighlight: '#F4F8F4',
 };
 
+/**
+ * Dark: true black ground with neutral graphite steps. Green is an accent only
+ * (primary actions, selected states, success), never the base. Elevation comes
+ * from lighter graphite, not shadow. `primary` and `danger` sit in the narrow band
+ * where white text on them and they on black both pass WCAG AA.
+ */
 export const darkColors: ColorRoles = {
-  bg: '#0A1510',
-  surface: '#111E17',
-  surfaceMuted: '#15241B',
-  surfaceRaised: '#172A1F',
-  line: '#213428',
-  lineStrong: '#2F4838',
+  bg: '#000000',
+  surface: '#141416',
+  surfaceMuted: '#0C0C0E',
+  surfaceRaised: '#1E1E22',
+  line: 'rgba(255, 255, 255, 0.08)',
+  lineStrong: 'rgba(255, 255, 255, 0.16)',
 
-  text: '#EAF2EC',
-  textSecondary: '#B2C4B8',
-  textTertiary: '#869A8D',
+  text: '#F5F5F7',
+  textSecondary: '#A8A8AF',
+  textTertiary: '#8B8B93',
   textOnBrand: '#FFFFFF',
-  textOnBrandMuted: '#BFDCC5',
+  textOnBrandMuted: '#D2DDD6',
 
-  primary: '#3F9E57',
-  primaryPressed: '#358A4B',
-  primaryTint: '#16301F',
-  primaryTintStrong: '#1C3D27',
-  band: '#0C2A18',
+  primary: '#118844',
+  primaryPressed: '#0D7439',
+  primaryTint: '#0F2318',
+  primaryTintStrong: '#153222',
+  primaryContent: '#34C766',
+  band: '#121614',
   bandText: '#FFFFFF',
-  leaf: '#62B574',
-  accentLime: '#A9BF45',
+  leaf: '#34C766',
+  accentLime: '#B4CC4A',
 
-  success: '#5DB472',
-  successTint: '#16301F',
-  warning: '#E2B45A',
-  warningTint: '#2F2613',
-  danger: '#EE7A68',
-  dangerPressed: '#E0624F',
-  dangerTint: '#3A1C17',
-  info: '#7CB9D3',
-  infoTint: '#132A33',
-  star: '#EBB441',
-  heart: '#F0715C',
+  success: '#34C766',
+  successTint: '#10251A',
+  warning: '#F2B84B',
+  warningTint: '#2B2215',
+  danger: '#D93B2D',
+  dangerPressed: '#BE3124',
+  dangerTint: '#2B1412',
+  info: '#5AB0E0',
+  infoTint: '#11222D',
+  star: '#F5B83D',
+  heart: '#FF6B57',
 
-  focus: '#7BD08F',
-  scrim: 'rgba(0, 0, 0, 0.6)',
+  focus: '#5BD682',
+  scrim: 'rgba(0, 0, 0, 0.72)',
   shadow: '#000000',
-  skeleton: '#1A2B21',
-  skeletonHighlight: '#22372A',
+  skeleton: '#18181B',
+  skeletonHighlight: '#232327',
 };
 
 /** 4 pt grid. */

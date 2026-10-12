@@ -177,6 +177,12 @@ export const SupplyListingDto = z.object({
   photos: z.array(z.string()),
   photoUrls: FileUrls,
   notes: NullableString,
+  /** When a QA officer approved the listing; null until then. */
+  qaApprovedAt: NullableDateTime,
+  /** The officer's note on the last check (the reason, when not approved). */
+  qaNote: NullableString,
+  qaPhotos: z.array(z.string()),
+  qaPhotoUrls: FileUrls,
   createdAt: IsoDateTime,
   updatedAt: IsoDateTime,
 });
@@ -345,6 +351,8 @@ export const StopDto = z.object({
   signatureKey: NullableString,
   signatureUrl: FileUrl,
   recipientName: NullableString,
+  /** When the recipient confirmed the drop-off with the SMS code instead of signing. */
+  codeConfirmedAt: NullableDateTime,
   failureReason: NullableString,
   cratesDropped: z.number().int(),
   cratesCollected: z.number().int(),

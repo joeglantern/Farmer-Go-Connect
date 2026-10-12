@@ -49,7 +49,9 @@ const list = (b) => (Array.isArray(b) ? b : (b?.items ?? []));
 const signIn = async (email) =>
   (await call('POST', '/api/auth/sign-in/email', { body: { email, password: PASSWORD } })).token;
 async function viewAs(admin, q) {
-  const u = list(await call('GET', `/v1/admin/users?q=${encodeURIComponent(q)}&limit=5`, { token: admin }))[0];
+  const u = list(
+    await call('GET', `/v1/admin/users?q=${encodeURIComponent(q)}&limit=5`, { token: admin }),
+  )[0];
   if (!u) throw new Error(`no demo user ${q}`);
   return (await call('POST', '/api/auth/admin/impersonate-user', { token: admin, body: { userId: u.id } }))
     .session.token;
@@ -81,7 +83,8 @@ const T = {
 };
 const buyerOrg = await orgOf(T.buyer);
 // The manual is in English, and the app applies each account's saved language on launch.
-for (const t of Object.values(T)) await call('PATCH', '/v1/me', { token: t, body: { preferredLanguage: 'en' } });
+for (const t of Object.values(T))
+  await call('PATCH', '/v1/me', { token: t, body: { preferredLanguage: 'en' } });
 
 const listings = list(await call('GET', '/v1/supply?limit=30', { token: T.buyer, org: buyerOrg }));
 const live = listings.filter((l) => ['OPEN', 'PARTIALLY_MATCHED'].includes(l.status) && l.quantityLeft >= 5);
@@ -138,12 +141,13 @@ async function freshOrder() {
   return orderId;
 }
 const qaOrder = await freshOrder();
-const delivered = list(await call('GET', '/v1/orders?scope=past&limit=10', { token: T.buyer, org: buyerOrg })).find(
-  (o) => o.status === 'COMPLETED',
-);
+const delivered = list(
+  await call('GET', '/v1/orders?scope=past&limit=10', { token: T.buyer, org: buyerOrg }),
+).find((o) => o.status === 'COMPLETED');
 const featured = list(await call('GET', '/v1/farmers/featured?limit=3', { token: T.buyer }))[0];
 const myListing = list(await call('GET', '/v1/supply?mine=true&limit=5', { token: T.farmer }))[0];
 const invoice = list(await call('GET', '/v1/invoices?limit=1', { token: T.chef }))[0];
+const pendingListing = list(await call('GET', '/v1/qa/listings?county=all', { token: T.qa }))[0];
 
 // ─── What to capture ──────────────────────────────────────────
 const SHOTS = [
@@ -175,6 +179,7 @@ const SHOTS = [
   ['agent-register', 'agent', '/agent/register'],
   ['qa-home', 'qa', '/home'],
   ['qa-task', 'qa', `/qa/${qaOrder}`],
+  ...(pendingListing ? [['qa-listing', 'qa', `/qa/listing/${pendingListing.id}`]] : []),
   ['driver-home', 'driver', '/home'],
   ['driver-scan', 'driver', '/scan'],
   ['supplier-home', 'supplier', '/home'],
